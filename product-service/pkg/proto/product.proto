@@ -11,8 +11,10 @@ message Product {
   float price = 3;
   string description = 4;
   string category = 5;
-  bool is_available = 6;
-  google.protobuf.Timestamp creation_date = 7;
+  int32 quantity = 6;
+  bool is_available = 7;
+  google.protobuf.Timestamp creation_date = 8;
+  int32 version = 9;
 }
 
 service ProductService {

@@ -77,7 +77,7 @@ func main() {
 
 	// Product service
 	productServiceConnection, err := grpc.Dial(fmt.Sprintf(":%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	failOnError(err, "Could not set up a connection to the server")
+	failOnError(err, "Could not set up a connection to the Product service")
 	defer productServiceConnection.Close()
-	
+
 }

@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"os"
 	"strconv"
 	"sync"
@@ -19,6 +21,9 @@ type config struct {
 		enabled bool
 		rps     float64
 		burst   int
+	}
+	productService struct {
+		port int
 	}
 }
 
@@ -54,6 +59,9 @@ func main() {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", limiterBurst, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
+	productServicePort, err := strconv.Atoi(getEnvVarString("PRODUCT_SERVICE_PORT"))
+	flag.IntVar(&cfg.productService.port, "product-service-port", productServicePort, "Product service port")
+
 	flag.Parse()
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
@@ -66,4 +74,10 @@ func main() {
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
+
+	// Product service
+	productServiceConnection, err := grpc.Dial(fmt.Sprintf(":%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	failOnError(err, "Could not set up a connection to the server")
+	defer productServiceConnection.Close()
+	
 }

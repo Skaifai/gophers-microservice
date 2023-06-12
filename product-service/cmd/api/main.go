@@ -3,17 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Skaifai/gophers-microservice/product-service/internal/data"
+	"github.com/Skaifai/gophers-microservice/product-service/internal/server"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 )
-
-type application struct {
-	config config
-	models data.Models
-}
 
 type config struct {
 	port int
@@ -45,19 +40,14 @@ func main() {
 	}
 	defer db.Close()
 
-	app := &application{
-		config: cfg,
-		models: data.NewModels(db),
-	}
-
 	srv := grpc.NewServer()
-	proto.RegisterProductServiceServer(srv, NewServer())
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", app.config.port))
+	proto.RegisterProductServiceServer(srv, server.NewServer(db))
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	log.Printf("Server is running on port :%d", app.config.port)
+	log.Printf("Server is running on port :%d", cfg.port)
 	if err := srv.Serve(listen); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

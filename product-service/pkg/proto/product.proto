@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/Skaifai/gophers-microservice/product-service/pkg/proto";
+
+message Product {
+  int64 id = 1;
+  string name = 2;
+  float price = 3;
+  string description = 4;
+  string category = 5;
+  int32 quantity = 6;
+  bool is_available = 7;
+  google.protobuf.Timestamp creation_date = 8;
+  int32 version = 9;
+}
+
+service ProductService {
+  rpc ShowProduct(ShowProductRequest) returns (ShowProductResponse);
+  rpc ListProducts(google.protobuf.Empty) returns (ListProductsResponse);
+  rpc AddProduct(AddProductRequest) returns (AddProductResponse);
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
+  rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
+}
+
+message ShowProductRequest {
+  int64 id = 1;
+}
+
+message ShowProductResponse {
+  Product product = 1;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+}
+
+message AddProductRequest {
+  Product product = 1;
+}
+
+message AddProductResponse {
+  string message = 1;
+}
+
+message UpdateProductRequest {
+  int64 id = 1;
+  Product product = 2;
+}
+
+message UpdateProductResponse {
+  string message = 1;
+}
+
+message DeleteProductRequest {
+  int64 id = 1;
+}
+
+message DeleteProductResponse {
+  string message = 1;
+}

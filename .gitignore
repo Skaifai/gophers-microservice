@@ -19,3 +19,12 @@
 
 # Go workspace file
 go.work
+
+# GoLand gitignore
+*.iml
+*.ipr
+*.iws
+.idea/
+/build/
+/dist/
+/out/

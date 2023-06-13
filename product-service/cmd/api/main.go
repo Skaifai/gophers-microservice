@@ -6,6 +6,7 @@ import (
 	"github.com/Skaifai/gophers-microservice/product-service/config"
 	"github.com/Skaifai/gophers-microservice/product-service/internal/server"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
+	_ "github.com/lib/pq"
 	"google.golang.org/grpc"
 	"log"
 	"net"

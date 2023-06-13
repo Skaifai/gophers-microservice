@@ -67,6 +67,6 @@ func (s *Server) DeleteProduct(ctx context.Context, req *proto.DeleteProductRequ
 	}
 
 	return &proto.DeleteProductResponse{
-		Message: fmt.Sprintf("Product has been successfully updated with id: %d", req.GetId()),
+		Message: fmt.Sprintf("Product has been successfully deleted with id: %d", req.GetId()),
 	}, nil
 }

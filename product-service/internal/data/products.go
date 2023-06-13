@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
@@ -31,11 +32,12 @@ func (p ProductModel) Insert(product *proto.Product) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := p.DB.QueryRowContext(ctx, query, args...).Scan(&product.Id, &product.CreationDate, &product.Version)
-
+	var creationDate time.Time
+	err := p.DB.QueryRowContext(ctx, query, args...).Scan(&product.Id, &creationDate, &product.Version)
 	if err != nil {
 		return 0, err
 	}
+	product.CreationDate = timestamppb.New(creationDate)
 
 	return product.Id, nil
 }
@@ -96,7 +98,7 @@ func (p ProductModel) Delete(id int64) error {
 
 	result, err := p.DB.Exec(query, id)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()

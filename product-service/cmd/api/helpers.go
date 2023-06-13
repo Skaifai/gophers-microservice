@@ -3,19 +3,20 @@ package main
 import (
 	"context"
 	"database/sql"
+	"github.com/Skaifai/gophers-microservice/product-service/config"
 	"time"
 )
 
-func openDB(cfg config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.db.dsn)
+func openDB(cfg *config.Config) (*sql.DB, error) {
+	db, err := sql.Open("postgres", cfg.DB.DSN)
 	if err != nil {
 		return nil, err
 	}
 
-	db.SetMaxIdleConns(cfg.db.maxIdleConns)
-	db.SetMaxOpenConns(cfg.db.maxOpenConns)
+	db.SetMaxIdleConns(cfg.DB.MaxIdleConns)
+	db.SetMaxOpenConns(cfg.DB.MaxOpenConns)
 
-	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
+	duration, err := time.ParseDuration(cfg.DB.MaxIdleTime)
 	if err != nil {
 		return nil, err
 	}

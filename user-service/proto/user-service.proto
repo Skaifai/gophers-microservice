@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+option go_package = "./user_service";
+
+service UserService {
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc Registration(RegistrationRequest) returns (RegistrationResponse);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
+    rpc Refresh(RefreshRequest) returns (RefreshResponse);
+} 
+
+message LoginRequest {
+    message user {
+        oneof key {
+            string username = 1;
+            string email = 2;
+        }
+        string password = 3;
+    }
+}
+
+message LoginResponse {
+    tokens tokens = 1;
+    int64 status = 2;
+}
+
+message RegistrationRequest {
+    message user {
+        string email = 1;
+        string username = 2;
+        string firstName = 3;
+        string lastName = 4;
+        string phoneNumber = 5;
+        google.protobuf.Timestamp DOB = 6;
+        string address = 7;
+        string aboutMe = 8;
+        string profPicURL = 9;
+        string password = 10;
+    }
+}
+
+message RegistrationResponse {
+    User userdata = 1;
+    int64 status = 2;
+}
+
+message LogoutRequest {
+    string refreshToken = 1;
+}
+
+message LogoutResponse {
+    int64 status = 1;
+}
+
+message RefreshRequest {
+    string refreshToken = 1;
+}
+
+message RefreshResponse {
+    tokens tokens = 1;
+    int64 status = 2;
+}
+
+message tokens {
+    string RefreshToken = 1;
+    string AccessToken = 2;
+}
+
+message User {
+    string id = 1;
+    string userRole = 2;
+    string username = 3;
+    string email = 4;
+    string password = 5;
+    google.protobuf.Timestamp registrationDate = 6; 
+    string firstName = 7;
+    string lastName = 8;
+    string phoneNumber = 9;
+    google.protobuf.Timestamp DOB = 10;
+    string address = 11;
+    string aboutMe = 12;
+    string profPicURL = 13;
+    bool   activated = 14;
+    string version = 15;
+}

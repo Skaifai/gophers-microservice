@@ -52,6 +52,7 @@ func (p ProductModel) Get(id int64) (*proto.Product, error) {
 		      WHERE id = $1`
 
 	var product proto.Product
+	var creationDate time.Time
 	err := p.DB.QueryRow(query, id).Scan(
 		&product.Id,
 		&product.Name,
@@ -59,9 +60,11 @@ func (p ProductModel) Get(id int64) (*proto.Product, error) {
 		&product.Description,
 		&product.Category,
 		&product.IsAvailable,
-		&product.CreationDate,
+		&creationDate,
 		&product.Version,
 	)
+
+	product.CreationDate = timestamppb.New(creationDate)
 
 	if err != nil {
 		switch {

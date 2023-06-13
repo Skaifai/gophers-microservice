@@ -4,6 +4,7 @@ import (
 	"api-gateway/internal/jsonlog"
 	"flag"
 	"fmt"
+	_ "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -55,9 +56,10 @@ func main() {
 	failOnError(err, "Could not parse LIMITER_RPS string into float64")
 	limiterBurst, err := strconv.Atoi(getEnvVarString("LIMITER_BURST"))
 	failOnError(err, "Could not parse LIMITER_BURST string into float64")
+	limiterEnabled, err := strconv.ParseBool(getEnvVarString("LIMITER_ENABLED"))
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", limiterRPS, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", limiterBurst, "Rate limiter maximum burst")
-	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", limiterEnabled, "Enable rate limiter")
 
 	productServicePort, err := strconv.Atoi(getEnvVarString("PRODUCT_SERVICE_PORT"))
 	flag.IntVar(&cfg.productService.port, "product-service-port", productServicePort, "Product service port")

@@ -43,3 +43,30 @@ func (s *Server) AddProduct(ctx context.Context, req *proto.AddProductRequest) (
 		Message: fmt.Sprintf("Product has been successfully added with id: %d", id),
 	}, nil
 }
+
+func (s *Server) UpdateProduct(ctx context.Context, req *proto.UpdateProductRequest) (*proto.UpdateProductResponse, error) {
+	product := req.GetProduct()
+	if product.GetId() != req.GetId() {
+		return nil, status.Error(codes.InvalidArgument, "Failed to update: unexpected arguments")
+	}
+
+	err := s.Products.Update(product)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to update product: %v", err)
+	}
+
+	return &proto.UpdateProductResponse{
+		Message: fmt.Sprintf("Product has been successfully updated with id: %d", req.GetId()),
+	}, nil
+}
+
+func (s *Server) DeleteProduct(ctx context.Context, req *proto.DeleteProductRequest) (*proto.DeleteProductResponse, error) {
+	err := s.Products.Delete(req.GetId())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to delete product: %v", err)
+	}
+
+	return &proto.DeleteProductResponse{
+		Message: fmt.Sprintf("Product has been successfully deleted with id: %d", req.GetId()),
+	}, nil
+}

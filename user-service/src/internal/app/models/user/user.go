@@ -1,7 +1,30 @@
 package user
 
-type Domain struct{}
+import "time"
 
-type Profile struct{}
+type Domain struct {
+	ID               string
+	Username         string
+	Email            string
+	RegistrationDate time.Time
+	Version          string
+}
 
-type Sec struct{}
+type Profile struct {
+	Domain      string
+	FirstName   string
+	LastName    string
+	PhoneNumber string
+	DOB         time.Time
+	Address     string
+	AboutMe     string
+	ProfPicURL  string
+	Version     string
+}
+
+type Auth struct {
+	Domain         string
+	Password       string
+	ActivationLink string
+	Activated      bool
+}

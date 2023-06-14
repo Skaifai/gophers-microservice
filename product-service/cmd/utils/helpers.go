@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func openDB(cfg *config.Config) (*sql.DB, error) {
+func OpenDB(cfg *config.Config) (*sql.DB, error) {
 	db, err := sql.Open("postgres", cfg.DB.DSN)
 	if err != nil {
 		return nil, err

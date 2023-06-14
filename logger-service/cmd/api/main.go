@@ -10,7 +10,9 @@ import (
 )
 
 type config struct {
-	rmqPort int
+	rmqPort     int
+	rmqUsername string
+	rmqPassword string
 }
 
 type LogServer struct {
@@ -28,10 +30,12 @@ func main() {
 	rabbitMQPort, err := strconv.Atoi(getEnvVarString("PORT"))
 	failOnError(err, "Could not convert string to int")
 	flag.IntVar(&cfg.rmqPort, "rabbitMQPort", rabbitMQPort, "The message broker port")
+	flag.StringVar(&cfg.rmqUsername, "rabbitMQUsername", getEnvVarString("RMQ_USERNAME"), "The message broker username")
+	flag.StringVar(&cfg.rmqUsername, "rabbitMQPassword", getEnvVarString("RMQ_PASSWORD"), "The message broker password")
 
 	flag.Parse()
 
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%d/", getEnvVarString("RMQ_USERNAME"), getEnvVarString("PASSWORD"), cfg.rmqPort)
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%d/", cfg.rmqUsername, cfg.rmqPassword, cfg.rmqPort)
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()

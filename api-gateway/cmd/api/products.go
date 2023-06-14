@@ -3,6 +3,7 @@ package main
 import (
 	"api-gateway/internal/validator"
 	"context"
+	"fmt"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -97,6 +98,60 @@ func (app *application) showProductHandler(w http.ResponseWriter, r *http.Reques
 	// Encode the struct to JSON and send it as the HTTP response.
 	// using envelope
 	err = app.writeJSON(w, http.StatusOK, product, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) listProductsHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Name     string
+		Category string
+		productServiceProto.Filters
+	}
+	// v := validator.New()
+	qs := r.URL.Query()
+	input.Name = app.readString(qs, "name", "")
+	fmt.Println(input.Name)
+	input.Category = app.readString(qs, "category", "")
+	input.Filters.Page = int32(app.readInt(qs, "page", 1))
+	input.Filters.PageSize = int32(app.readInt(qs, "page_size", 20))
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.SortSafeList = []string{"id", "name", "category", "price", "is_available", "creation_date",
+		"-id", "-name", "-category", "-price", "-is_available", "-creation_date"}
+
+	// if data.ValidateFilters(v, input.Filters); !v.Valid() {
+	// 	app.failedValidationResponse(w, r, v.Errors)
+	// 	return
+	// }
+	// Call the GetAll() method to retrieve the movies, passing in the various filter
+	// parameters.
+	// Accept the metadata struct as a return value.
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	response, err := productServiceClient.ListProducts(ctx, &productServiceProto.ListProductsRequest{
+		Name:     input.Name,
+		Category: input.Category,
+		Filters:  &input.Filters,
+	})
+	if err != nil {
+		errorStatus, _ := status.FromError(err)
+		switch {
+		case errorStatus.Code() == codes.DeadlineExceeded:
+			app.deadlineExceededResponse(w, r, err)
+		case errorStatus.Code() == codes.Unavailable:
+			app.serviceUnavailableResponse(w, r, err)
+		case errorStatus.Code() == codes.NotFound:
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	// Include the metadata in the response envelope.
+	err = app.writeJSON(w, http.StatusOK, envelope{"products": response.Products, "metadata": response.Metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

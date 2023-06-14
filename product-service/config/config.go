@@ -1,5 +1,11 @@
 package config
 
+import (
+	"github.com/joho/godotenv"
+	"os"
+	"strconv"
+)
+
 type Config struct {
 	Port int
 	Env  string
@@ -11,9 +17,15 @@ type Config struct {
 	}
 }
 
+func GetEnvironmentVar(key string) string {
+	godotenv.Load(".env")
+	return os.Getenv(key)
+}
+
 func LoadConfiguration() *Config {
+	port, _ := strconv.Atoi(GetEnvironmentVar("PORT"))
 	return &Config{
-		Port: 8080,
+		Port: port,
 		Env:  "development",
 		DB: struct {
 			DSN          string
@@ -21,7 +33,7 @@ func LoadConfiguration() *Config {
 			MaxIdleConns int
 			MaxIdleTime  string
 		}{
-			DSN:          "postgres://postgres:0000@localhost/gophers?sslmode=disable",
+			DSN:          GetEnvironmentVar("DB_DSN"),
 			MaxOpenConns: 25,
 			MaxIdleConns: 25,
 			MaxIdleTime:  "15m",

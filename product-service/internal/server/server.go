@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/Skaifai/gophers-microservice/product-service/internal/logger"
 
 	"github.com/Skaifai/gophers-microservice/product-service/internal/data"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
@@ -15,11 +16,13 @@ import (
 type Server struct {
 	proto.UnimplementedProductServiceServer
 	data.Models
+	*logger.Publisher
 }
 
-func NewServer(db *sql.DB) *Server {
+func NewServer(db *sql.DB, publisher *logger.Publisher) *Server {
 	return &Server{
-		Models: data.NewModels(db),
+		Models:    data.NewModels(db),
+		Publisher: publisher,
 	}
 }
 
@@ -56,6 +59,11 @@ func (s *Server) AddProduct(ctx context.Context, req *proto.AddProductRequest) (
 		return nil, status.Errorf(codes.Internal, "Failed to add product: %v", err)
 	}
 
+	err = s.Publisher.SendLog(fmt.Sprintf("Product has been successfully created with id: %d", response.Id))
+	if err != nil {
+		return nil, err
+	}
+
 	return &proto.AddProductResponse{
 		Product: response,
 	}, nil
@@ -67,6 +75,11 @@ func (s *Server) UpdateProduct(ctx context.Context, req *proto.UpdateProductRequ
 	err := s.Products.Update(product)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to update product: %v", err)
+	}
+
+	err = s.Publisher.SendLog(fmt.Sprintf("Product has been successfully updated with id: %d", product.GetId()))
+	if err != nil {
+		return nil, err
 	}
 
 	return &proto.UpdateProductResponse{
@@ -81,6 +94,11 @@ func (s *Server) DeleteProduct(ctx context.Context, req *proto.DeleteProductRequ
 			return nil, status.Errorf(codes.NotFound, "Product not found: %v", err)
 		}
 		return nil, status.Errorf(codes.Internal, "Failed to delete product: %v", err)
+	}
+
+	err = s.Publisher.SendLog(fmt.Sprintf("Product has been successfully deleted with id: %d", req.GetId()))
+	if err != nil {
+		return nil, err
 	}
 
 	return &proto.DeleteProductResponse{

@@ -42,11 +42,10 @@ message AddProductRequest {
 }
 
 message AddProductResponse {
-  string message = 1;
+  Product product = 1;
 }
 
 message UpdateProductRequest {
-  int64 id = 1;
   Product product = 2;
 }
 

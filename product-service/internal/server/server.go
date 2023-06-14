@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/Skaifai/gophers-microservice/product-service/internal/data"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/grpc/codes"
@@ -34,21 +35,18 @@ func (s *Server) ShowProduct(ctx context.Context, req *proto.ShowProductRequest)
 
 func (s *Server) AddProduct(ctx context.Context, req *proto.AddProductRequest) (*proto.AddProductResponse, error) {
 	product := req.GetProduct()
-	id, err := s.Products.Insert(product)
+	response, err := s.Products.Insert(product)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to add product: %v", err)
 	}
 
 	return &proto.AddProductResponse{
-		Message: fmt.Sprintf("Product has been successfully added with id: %d", id),
+		Product: response,
 	}, nil
 }
 
 func (s *Server) UpdateProduct(ctx context.Context, req *proto.UpdateProductRequest) (*proto.UpdateProductResponse, error) {
 	product := req.GetProduct()
-	//if product.GetId() != req.GetId() {
-	//	return nil, status.Error(codes.InvalidArgument, "Failed to update: unexpected arguments")
-	//}
 
 	err := s.Products.Update(product)
 	if err != nil {

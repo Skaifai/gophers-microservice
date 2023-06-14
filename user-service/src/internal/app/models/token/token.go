@@ -1,7 +1,9 @@
 package token
 
-type RefreshToken struct {
-	Owner       string
+import "time"
+
+type Refresh struct {
+	Key         string
+	CreatedAt   time.Time
 	TokenString string
-	Version     string
 }

@@ -2,12 +2,15 @@ package psql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
+
+var ErrNoRecord = errors.New("not found")
 
 type DB struct {
 	client *sqlx.DB

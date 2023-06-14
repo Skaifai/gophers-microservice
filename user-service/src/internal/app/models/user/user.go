@@ -19,7 +19,6 @@ type Profile struct {
 	Address     string
 	AboutMe     string
 	ProfPicURL  string
-	Version     string
 }
 
 type Auth struct {

@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=gophers-microservice
+    ports:
+      - "5432:5432"
+
+  server:
+    build: ./
+    container_name: server
+    depends_on:
+      - product-service
+    ports:
+      - "7000:7000"
+
+  product-service:
+    build:
+      context: product-service
+      dockerfile: deployments/deploy/product-service.dockerfile
+    container_name: product-service
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"github.com/joho/godotenv"
+	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"os"
@@ -26,6 +27,11 @@ type config struct {
 	productService struct {
 		port int
 	}
+	rmq struct {
+		port     int
+		username string
+		password string
+	}
 }
 
 type application struct {
@@ -36,6 +42,7 @@ type application struct {
 
 var productServiceConnection *grpc.ClientConn
 var productServiceClient productServiceProto.ProductServiceClient
+var rmqDSN string
 
 func getEnvVarString(key string) string {
 	err := godotenv.Load(".env")
@@ -67,8 +74,22 @@ func main() {
 	productServicePort, err := strconv.Atoi(getEnvVarString("PRODUCT_SERVICE_PORT"))
 	flag.IntVar(&cfg.productService.port, "product-service-port", productServicePort, "Product service port")
 
+	rabbitMQPort, err := strconv.Atoi(getEnvVarString("RMQ_PORT"))
+	failOnError(err, "Could not parse RMQ_PORT to int")
+	flag.IntVar(&cfg.rmq.port, "rabbitMQPort", rabbitMQPort, "Message broker port")
+	flag.StringVar(&cfg.rmq.username, "rmq-username", getEnvVarString("RMQ_USERNAME"), "Message broker username")
+	flag.StringVar(&cfg.rmq.password, "rmq-password", getEnvVarString("RMQ_PASSWORD"), "Message broker password")
+
 	flag.Parse()
-	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+
+	// RabbitMQ
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%d/", cfg.rmq.username, cfg.rmq.password, cfg.rmq.port)
+	conn, err := amqp.Dial(rmqDSN)
+	failOnError(err, "Could not set up a connection to the message broker")
+	defer conn.Close()
+	
+	// Logger
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo, rmqDSN)
 
 	app := &application{
 		config: cfg,

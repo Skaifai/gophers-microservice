@@ -5,7 +5,6 @@ import (
 	"context"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/status"
 	"net/http"
 	"time"
@@ -110,13 +109,13 @@ func (app *application) updateProductHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if productServiceConnection.GetState() != connectivity.Ready {
-		app.logger.PrintInfo("Failed to update product due to no connection to the product service", map[string]string{
-			"method:": "updateProductHandler",
-		})
-		app.errorResponse(w, r, http.StatusInternalServerError, "Failed to update product due to no connection to the product service")
-		return
-	}
+	//if productServiceConnection.GetState() != connectivity.Ready {
+	//	app.logger.PrintInfo("Failed to update product due to no connection to the product service", map[string]string{
+	//		"method:": "updateProductHandler",
+	//	})
+	//	app.errorResponse(w, r, http.StatusInternalServerError, "Failed to update product due to no connection to the product service")
+	//	return
+	//}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
@@ -216,13 +215,13 @@ func (app *application) deleteProductHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if productServiceConnection.GetState() != connectivity.Ready {
-		app.logger.PrintInfo("Failed to delete product due to no connection to the product service", map[string]string{
-			"method:": "deleteProductHandler",
-		})
-		app.errorResponse(w, r, http.StatusInternalServerError, "Failed to delete product due to no connection to the product service")
-		return
-	}
+	//if productServiceConnection.GetState() != connectivity.Ready {
+	//	app.logger.PrintInfo("Failed to delete product due to no connection to the product service", map[string]string{
+	//		"method:": "deleteProductHandler",
+	//	})
+	//	app.errorResponse(w, r, http.StatusInternalServerError, "Failed to delete product due to no connection to the product service")
+	//	return
+	//}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

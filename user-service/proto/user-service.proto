@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
-option go_package = "./user_service";
+option go_package = "./proto";
 
 service UserService {
     rpc Login(LoginRequest) returns (LoginResponse);
@@ -10,6 +10,7 @@ service UserService {
     rpc Refresh(RefreshRequest) returns (RefreshResponse);
 } 
 
+// User-Agent: grab from http headers
 message LoginRequest {
     message user {
         oneof key {
@@ -18,8 +19,10 @@ message LoginRequest {
         }
         string password = 3;
     }
+    string userAgent = 2;
 }
 
+//refresh-token: save into cookies, access-token: send to client
 message LoginResponse {
     tokens tokens = 1;
     int64 status = 2;
@@ -45,20 +48,25 @@ message RegistrationResponse {
     int64 status = 2;
 }
 
+//refresh-token: grab from cookies, User-Agent: grab from http headers
 message LogoutRequest {
     string refreshToken = 1;
+    string userAgent = 2;
 }
 
 message LogoutResponse {
     int64 status = 1;
 }
 
+//refresh-token: grab from cookies, User-Agent: grab from http headers
 message RefreshRequest {
     string refreshToken = 1;
+    string userAgent = 2;
 }
 
+//send access token to client
 message RefreshResponse {
-    tokens tokens = 1;
+    tokens accessToken = 1;
     int64 status = 2;
 }
 

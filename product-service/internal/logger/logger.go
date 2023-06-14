@@ -1,6 +1,5 @@
 package logger
 
-import "C"
 import (
 	"context"
 	"github.com/Skaifai/gophers-microservice/product-service/config"

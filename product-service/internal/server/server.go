@@ -54,6 +54,7 @@ func (s *Server) ListProducts(ctx context.Context, req *proto.ListProductsReques
 
 func (s *Server) AddProduct(ctx context.Context, req *proto.AddProductRequest) (*proto.AddProductResponse, error) {
 	product := req.GetProduct()
+	data.SetStatus(product)
 	response, err := s.Products.Insert(product)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Failed to add product: %v", err)

@@ -16,6 +16,14 @@ type ProductModel struct {
 	DB *sql.DB
 }
 
+func SetStatus(product *proto.Product) {
+	if product.GetQuantity() > 0 {
+		product.IsAvailable = true
+	} else {
+		product.IsAvailable = false
+	}
+}
+
 func (p ProductModel) Insert(product *proto.Product) (*proto.Product, error) {
 	query := `INSERT INTO products (name, price, description, category, quantity, is_available)
 			  VALUES ($1, $2, $3, $4, $5, $6)

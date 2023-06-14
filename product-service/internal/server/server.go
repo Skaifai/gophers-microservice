@@ -33,6 +33,18 @@ func (s *Server) ShowProduct(ctx context.Context, req *proto.ShowProductRequest)
 	}, nil
 }
 
+func (s *Server) ListProducts(ctx context.Context, req *proto.ListProductsRequest) (*proto.ListProductsResponse, error) {
+	products, metadata, err := s.Products.GetAll(req.GetName(), req.GetCategory(), req.GetFilters())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to get products: %v", err)
+	}
+
+	return &proto.ListProductsResponse{
+		Metadata: metadata,
+		Products: products,
+	}, nil
+}
+
 func (s *Server) AddProduct(ctx context.Context, req *proto.AddProductRequest) (*proto.AddProductResponse, error) {
 	product := req.GetProduct()
 	response, err := s.Products.Insert(product)

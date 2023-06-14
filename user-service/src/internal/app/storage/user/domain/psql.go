@@ -13,13 +13,6 @@ import (
 	"github.com/Skaifai/gophers-microservice/user-service/internal/lib/helpers"
 )
 
-// type storage interface {
-// 	Create(context.Context, *user.Domain) (*user.Domain, error)
-// 	Update(context.Context, *user.Domain) (*user.Domain, error)
-// 	DeleteByID(context.Context, string) error
-// 	GetByID(context.Context, string) (*user.Domain, error)
-// }
-
 type postgres struct {
 	DB *psql.DB
 }
@@ -30,7 +23,7 @@ func NewPSQL(db *psql.DB) *postgres {
 	}
 }
 
-func (s *postgres) Create(ctx context.Context, u *user.Domain) (_ *user.Domain, err error) {
+func (s *postgres) CreateDomain(ctx context.Context, u *user.Domain) (_ *user.Domain, err error) {
 	var (
 		errmsg = `user.domain.storage.Create`
 		query  = `
@@ -58,7 +51,7 @@ func (s *postgres) Create(ctx context.Context, u *user.Domain) (_ *user.Domain, 
 	return pqToModel(d), nil
 }
 
-func (s *postgres) Update(ctx context.Context, u *user.Domain) (_ *user.Domain, err error) {
+func (s *postgres) UpdateDomain(ctx context.Context, u *user.Domain) (_ *user.Domain, err error) {
 	var (
 		errmsg = `user.domain.storage.Update`
 		query  = `
@@ -85,7 +78,7 @@ func (s *postgres) Update(ctx context.Context, u *user.Domain) (_ *user.Domain, 
 	return pqToModel(d), nil
 }
 
-func (s *postgres) DeleteByID(ctx context.Context, ID string) (err error) {
+func (s *postgres) DeleteDomain(ctx context.Context, ID string) (err error) {
 	var (
 		errmsg = `user.domain.storage.DeleteByID`
 		query  = `
@@ -118,7 +111,7 @@ func (s *postgres) DeleteByID(ctx context.Context, ID string) (err error) {
 	return nil
 }
 
-func (s *postgres) GetByID(ctx context.Context, ID string) (_ *user.Domain, err error) {
+func (s *postgres) GetDomain(ctx context.Context, ID string) (_ *user.Domain, err error) {
 	var (
 		errmsg = `user.domain.storage.GetByID`
 		query  = `SELECT id, username, email, registration_date, version

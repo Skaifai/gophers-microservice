@@ -22,6 +22,7 @@ const (
 	UserService_Login_FullMethodName          = "/UserService/Login"
 	UserService_Registration_FullMethodName   = "/UserService/Registration"
 	UserService_Logout_FullMethodName         = "/UserService/Logout"
+	UserService_Activate_FullMethodName       = "/UserService/Activate"
 	UserService_Refresh_FullMethodName        = "/UserService/Refresh"
 	UserService_IsLogged_FullMethodName       = "/UserService/IsLogged"
 	UserService_GetUserByToken_FullMethodName = "/UserService/GetUserByToken"
@@ -38,6 +39,7 @@ type UserServiceClient interface {
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Registration(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	Activate(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*ActivateResponse, error)
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*RefreshResponse, error)
 	IsLogged(ctx context.Context, in *IsLoggedRequest, opts ...grpc.CallOption) (*IsLoggedResponse, error)
 	GetUserByToken(ctx context.Context, in *GetUserByTokenRequest, opts ...grpc.CallOption) (*GetUserByTokenResponse, error)
@@ -76,6 +78,15 @@ func (c *userServiceClient) Registration(ctx context.Context, in *RegistrationRe
 func (c *userServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
 	out := new(LogoutResponse)
 	err := c.cc.Invoke(ctx, UserService_Logout_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) Activate(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*ActivateResponse, error) {
+	out := new(ActivateResponse)
+	err := c.cc.Invoke(ctx, UserService_Activate_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +163,7 @@ type UserServiceServer interface {
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Registration(context.Context, *RegistrationRequest) (*RegistrationResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	Activate(context.Context, *ActivateRequest) (*ActivateResponse, error)
 	Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error)
 	IsLogged(context.Context, *IsLoggedRequest) (*IsLoggedResponse, error)
 	GetUserByToken(context.Context, *GetUserByTokenRequest) (*GetUserByTokenResponse, error)
@@ -174,6 +186,9 @@ func (UnimplementedUserServiceServer) Registration(context.Context, *Registratio
 }
 func (UnimplementedUserServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedUserServiceServer) Activate(context.Context, *ActivateRequest) (*ActivateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Activate not implemented")
 }
 func (UnimplementedUserServiceServer) Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
@@ -259,6 +274,24 @@ func _UserService_Logout_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_Activate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActivateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).Activate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_Activate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).Activate(ctx, req.(*ActivateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -407,6 +440,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _UserService_Logout_Handler,
+		},
+		{
+			MethodName: "Activate",
+			Handler:    _UserService_Activate_Handler,
 		},
 		{
 			MethodName: "Refresh",

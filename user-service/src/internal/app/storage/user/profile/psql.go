@@ -22,7 +22,7 @@ func NewPSQL(db *psql.DB) *postgres {
 	}
 }
 
-func (s *postgres) Create(ctx context.Context, u *user.Profile) (_ *user.Profile, err error) {
+func (s *postgres) CreateProfile(ctx context.Context, u *user.Profile) (_ *user.Profile, err error) {
 	var (
 		errmsg = `user.profile.storage.Create`
 		query  = `
@@ -48,7 +48,7 @@ func (s *postgres) Create(ctx context.Context, u *user.Profile) (_ *user.Profile
 	return pqToModel(a), nil
 }
 
-func (s *postgres) Update(ctx context.Context, u *user.Profile) (_ *user.Profile, err error) {
+func (s *postgres) UpdateProfile(ctx context.Context, u *user.Profile) (_ *user.Profile, err error) {
 	var (
 		errmsg = `user.profile.storage.Update`
 		query  = `UPDATE user_profiles
@@ -73,7 +73,7 @@ func (s *postgres) Update(ctx context.Context, u *user.Profile) (_ *user.Profile
 	return pqToModel(p), nil
 }
 
-func (s *postgres) DeleteByDomain(ctx context.Context, Domain string) (err error) {
+func (s *postgres) DeleteProfile(ctx context.Context, Domain string) (err error) {
 	var (
 		errmsg = `user.profile.storage.DeleteByDomain`
 		query  = `DELETE FROM user_profiles
@@ -104,7 +104,7 @@ func (s *postgres) DeleteByDomain(ctx context.Context, Domain string) (err error
 	return nil
 }
 
-func (s *postgres) GetByDomain(ctx context.Context, Domain string) (_ *user.Profile, err error) {
+func (s *postgres) GetProfile(ctx context.Context, Domain string) (_ *user.Profile, err error) {
 	var (
 		errmsg = `user.profile.GetByDomain`
 		query  = `SELECT domain_user_id, first_name, last_name, phone_number, date_of_birth, address, about_me, profile_pic_url

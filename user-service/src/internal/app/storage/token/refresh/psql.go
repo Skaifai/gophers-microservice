@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
-	"cuelang.org/go/pkg/time"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/app/models/token"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/lib/clients/psql"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/lib/e"

@@ -21,7 +21,7 @@ func NewPSQL(db *psql.DB) *postgres {
 	}
 }
 
-func (s *postgres) Create(ctx context.Context, u *user.Auth) (_ *user.Auth, err error) {
+func (s *postgres) CreateAuth(ctx context.Context, u *user.Auth) (_ *user.Auth, err error) {
 	var (
 		errmsg = `user.auth.storage.Create`
 		query  = `
@@ -46,13 +46,13 @@ func (s *postgres) Create(ctx context.Context, u *user.Auth) (_ *user.Auth, err 
 	return pqToModel(a), nil
 }
 
-func (s *postgres) Update(ctx context.Context, u *user.Auth) (_ *user.Auth, err error) {
+func (s *postgres) UpdateAuth(ctx context.Context, u *user.Auth) (_ *user.Auth, err error) {
 	var (
 		errmsg = `user.auth.storage.Update`
 		query  = `
 				UPDATE user_auths
-				SET password = $1, activation_link = $2, activated = $3
-				WHERE domain_user_id = $4
+				SET password = $1, activated = $2
+				WHERE domain_user_id = $3
 				RETURNING activated;
 		`
 	)
@@ -64,7 +64,7 @@ func (s *postgres) Update(ctx context.Context, u *user.Auth) (_ *user.Auth, err 
 		return nil, err
 	}
 
-	args := []any{a.Password, a.ActivationLink, a.Activated, a.Domain}
+	args := []any{a.Password, a.Activated, a.Domain}
 	if err := s.DB.Conn().QueryRowxContext(ctx, query, args...).Scan(&a.Activated); err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (s *postgres) Update(ctx context.Context, u *user.Auth) (_ *user.Auth, err 
 	return pqToModel(a), nil
 }
 
-func (s *postgres) DeleteByDomain(ctx context.Context, Domain string) (err error) {
+func (s *postgres) DeleteAuth(ctx context.Context, Domain string) (err error) {
 	var (
 		errmsg = `user.auth.storage.DeleteByDomain`
 		query  = `DELETE FROM user_auths
@@ -103,10 +103,10 @@ func (s *postgres) DeleteByDomain(ctx context.Context, Domain string) (err error
 	return nil
 }
 
-func (s *postgres) GetByDomain(ctx context.Context, Domain string) (_ *user.Auth, err error) {
+func (s *postgres) GetAuth(ctx context.Context, Domain string) (_ *user.Auth, err error) {
 	var (
 		errmsg = `user.auth.storage.GetByDomain`
-		query  = `SELECT domain_user_id, password, activation_link, activated
+		query  = `SELECT domain_user_id, role, password, activation_link, activated
 					FROM user_auths
 					WHERE domain_user_id = $1`
 	)
@@ -120,7 +120,7 @@ func (s *postgres) GetByDomain(ctx context.Context, Domain string) (_ *user.Auth
 
 	var a pqdto
 
-	if err = s.DB.Conn().QueryRowxContext(ctx, query, domain_id).Scan(&a.Domain, &a.Password, &a.ActivationLink, &a.Activated); err != nil {
+	if err = s.DB.Conn().QueryRowxContext(ctx, query, domain_id).Scan(&a.Domain, &a.Role, &a.Password, &a.ActivationLink, &a.Activated); err != nil {
 
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -135,6 +135,7 @@ func (s *postgres) GetByDomain(ctx context.Context, Domain string) (_ *user.Auth
 
 type pqdto struct {
 	Domain         int64
+	Role           string
 	Password       string
 	ActivationLink string
 	Activated      bool
@@ -143,6 +144,7 @@ type pqdto struct {
 func pqToModel(a *pqdto) *user.Auth {
 	return &user.Auth{
 		Domain:         helpers.Itoa64(a.Domain),
+		Role:           a.Role,
 		Password:       a.Password,
 		ActivationLink: a.ActivationLink,
 		Activated:      a.Activated,
@@ -157,6 +159,7 @@ func pqFromModel(a *user.Auth) (*pqdto, error) {
 
 	return &pqdto{
 		Domain:         domain,
+		Role:           a.Role,
 		Password:       a.Password,
 		ActivationLink: a.ActivationLink,
 		Activated:      a.Activated,

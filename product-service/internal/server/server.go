@@ -46,9 +46,9 @@ func (s *Server) AddProduct(ctx context.Context, req *proto.AddProductRequest) (
 
 func (s *Server) UpdateProduct(ctx context.Context, req *proto.UpdateProductRequest) (*proto.UpdateProductResponse, error) {
 	product := req.GetProduct()
-	if product.GetId() != req.GetId() {
-		return nil, status.Error(codes.InvalidArgument, "Failed to update: unexpected arguments")
-	}
+	//if product.GetId() != req.GetId() {
+	//	return nil, status.Error(codes.InvalidArgument, "Failed to update: unexpected arguments")
+	//}
 
 	err := s.Products.Update(product)
 	if err != nil {
@@ -56,7 +56,7 @@ func (s *Server) UpdateProduct(ctx context.Context, req *proto.UpdateProductRequ
 	}
 
 	return &proto.UpdateProductResponse{
-		Message: fmt.Sprintf("Product has been successfully updated with id: %d", req.GetId()),
+		Message: fmt.Sprintf("Product has been successfully updated with id: %d", product.GetId()),
 	}, nil
 }
 

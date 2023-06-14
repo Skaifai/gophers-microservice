@@ -92,7 +92,6 @@ func (p ProductModel) Update(product *proto.Product) error {
 		product.Quantity,
 		product.Id,
 	}
-
 	return p.DB.QueryRow(query, args...).Scan(&product.Version)
 }
 

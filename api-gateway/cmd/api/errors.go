@@ -1,6 +1,14 @@
 package main
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
+
+var (
+	ErrRecordNotFound = errors.New("record not found")
+	ErrEditConflict   = errors.New("edit conflict")
+)
 
 func (app *application) logError(r *http.Request, err error) {
 	app.logger.PrintError(err, map[string]string{
@@ -19,6 +27,27 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	}
 }
 
+func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request) {
+	message := "the requested resource could not be found"
+	app.errorResponse(w, r, http.StatusNotFound, message)
+}
+
+func (app *application) deadlineExceededResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logError(r, err)
+	message := "the deadline was exceeded"
+	app.errorResponse(w, r, http.StatusRequestTimeout, message)
+}
+
+func (app *application) serviceUnavailableResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.logError(r, err)
+	message := "the service is unavailable"
+	app.errorResponse(w, r, http.StatusServiceUnavailable, message)
+}
+
+func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+}
+
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.logError(r, err)
 	message := "the server encountered a problem and could not process your request"
@@ -28,4 +57,8 @@ func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Reque
 func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
 	message := "rate limit exceeded"
 	app.errorResponse(w, r, http.StatusTooManyRequests, message)
+}
+
+func (app *application) failedValidationResponse(w http.ResponseWriter, r *http.Request, errors map[string]string) {
+	app.errorResponse(w, r, http.StatusUnprocessableEntity, errors)
 }

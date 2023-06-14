@@ -4,7 +4,7 @@ import (
 	"api-gateway/internal/jsonlog"
 	"flag"
 	"fmt"
-	_ "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
+	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -33,6 +33,9 @@ type application struct {
 	logger *jsonlog.Logger
 	wg     sync.WaitGroup
 }
+
+var productServiceConnection *grpc.ClientConn
+var productServiceClient productServiceProto.ProductServiceClient
 
 func getEnvVarString(key string) string {
 	err := godotenv.Load(".env")
@@ -72,14 +75,14 @@ func main() {
 		logger: logger,
 	}
 
+	// Product service
+	productServiceConnection, err = grpc.Dial(fmt.Sprintf(":%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	failOnError(err, "Could not set up a connection to the Product service")
+	defer productServiceConnection.Close()
+	productServiceClient = productServiceProto.NewProductServiceClient(productServiceConnection)
+
 	err = app.serve()
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
-
-	// Product service
-	productServiceConnection, err := grpc.Dial(fmt.Sprintf(":%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	failOnError(err, "Could not set up a connection to the Product service")
-	defer productServiceConnection.Close()
-
 }

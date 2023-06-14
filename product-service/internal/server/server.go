@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/Skaifai/gophers-microservice/product-service/internal/data"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/grpc/codes"

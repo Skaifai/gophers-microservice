@@ -1,6 +1,19 @@
 version: '3'
 
 services:
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
   postgres:
     image: postgres
     container_name: postgres
@@ -18,5 +31,27 @@ services:
     container_name: product-service
     depends_on:
       - postgres
+      - rabbitmq
     ports:
       - "8080:8080"
+
+  logger-service:
+    build:
+      context: logger-service
+      dockerfile: deployments/deploy/logger-service.dockerfile
+    container_name: logger-service
+    depends_on:
+      - rabbitmq
+    ports:
+      - "6000:6000"
+
+  api-gateway:
+    build:
+      context: api-gateway
+      dockerfile: deployments/deploy/api-gateway.dockerfile
+    container_name: api-gateway
+    depends_on:
+      - logger-service
+      - product-service
+    ports:
+      - "7001:7001"

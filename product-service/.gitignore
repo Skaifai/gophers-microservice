@@ -28,5 +28,3 @@ go.work
 /build/
 /dist/
 /out/
-
-.env

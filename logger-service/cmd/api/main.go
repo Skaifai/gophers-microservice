@@ -31,11 +31,11 @@ func main() {
 	failOnError(err, "Could not convert string to int")
 	flag.IntVar(&cfg.rmqPort, "rabbitMQPort", rabbitMQPort, "The message broker port")
 	flag.StringVar(&cfg.rmqUsername, "rabbitMQUsername", getEnvVarString("RMQ_USERNAME"), "The message broker username")
-	flag.StringVar(&cfg.rmqUsername, "rabbitMQPassword", getEnvVarString("RMQ_PASSWORD"), "The message broker password")
+	flag.StringVar(&cfg.rmqPassword, "rabbitMQPassword", getEnvVarString("RMQ_PASSWORD"), "The message broker password")
 
 	flag.Parse()
 
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%d/", cfg.rmqUsername, cfg.rmqPassword, cfg.rmqPort)
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%d/", getEnvVarString("RMQ_USERNAME"), getEnvVarString("RMQ_PASSWORD"), cfg.rmqPort)
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()

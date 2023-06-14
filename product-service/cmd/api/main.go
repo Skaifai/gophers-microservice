@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/Skaifai/gophers-microservice/product-service/cmd/utils"
 	"github.com/Skaifai/gophers-microservice/product-service/config"
 	"github.com/Skaifai/gophers-microservice/product-service/internal/logger"
 	"github.com/Skaifai/gophers-microservice/product-service/internal/server"
@@ -26,7 +27,7 @@ func main() {
 
 	flag.Parse()
 
-	db, err := openDB(cfg)
+	db, err := utils.OpenDB(cfg)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

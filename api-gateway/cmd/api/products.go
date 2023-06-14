@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"time"
 )
-import _ "github.com/Skaifai/gophers-microservice/product-service/pkg/server"
 
 func (app *application) addProductHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
@@ -61,11 +60,7 @@ func (app *application) addProductHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	app.logger.PrintInfo(response.GetMessage(), map[string]string{
-		"method": "addProductHandler",
-	})
-
-	err = app.writeJSON(w, http.StatusAccepted, envelope{"product": product}, nil)
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"product": response.Product}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

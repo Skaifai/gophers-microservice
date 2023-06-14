@@ -85,14 +85,9 @@ message DeleteUserResponse {
 
 // User-Agent: grab from http headers
 message LoginRequest {
-    message user {
-        oneof key {
-            string username = 1;
-            string email = 2;
-        }
-        string password = 3;
-    }
+    string key = 1;
     string userAgent = 2;
+    string password = 3;
 }
 
 //refresh-token: save into cookies, access-token: send to client
@@ -102,18 +97,16 @@ message LoginResponse {
 }
 
 message RegistrationRequest {
-    message user {
-        string email = 1;
-        string username = 2;
-        string firstName = 3;
-        string lastName = 4;
-        string phoneNumber = 5;
-        google.protobuf.Timestamp DOB = 6;
-        string address = 7;
-        string aboutMe = 8;
-        string profPicURL = 9;
-        string password = 10;
-    }
+    string email = 1;
+    string username = 2;
+    string firstName = 3;
+    string lastName = 4;
+    string phoneNumber = 5;
+    google.protobuf.Timestamp DOB = 6;
+    string address = 7;
+    string aboutMe = 8;
+    string profPicURL = 9;
+    string password = 10;
 }
 
 message RegistrationResponse {

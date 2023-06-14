@@ -15,6 +15,7 @@ type service interface {
 	GetByUserID(ctx context.Context, id string) (_ *user.User, err error)
 	DeleteUserByID(ctx context.Context, id string) (err error)
 	UpdateUser(ctx context.Context, u *user.User) (_ *user.User, err error)
+	Registrate(ctx context.Context, u *user.User) (*user.User, error)
 }
 
 type handler struct {
@@ -75,11 +76,12 @@ func (h *handler) Login(ctx context.Context, _ *proto.LoginRequest) (*proto.Logi
 	return nil, nil
 }
 
-func (h *handler) Registration(ctx context.Context, _ *proto.RegistrationRequest) (*proto.RegistrationResponse, error) {
+func (h *handler) Registration(ctx context.Context, req *proto.RegistrationRequest) (*proto.RegistrationResponse, error) {
+
 	return nil, nil
 }
 
-func (h *handler) Logout(ctx context.Context, _ *proto.LogoutRequest) (*proto.LogoutResponse, error) {
+func (h *handler) Logout(ctx context.Context, req *proto.LogoutRequest) (*proto.LogoutResponse, error) {
 
 	return nil, nil
 }

@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/Skaifai/gophers-microservice/user-service/internal/app/handlers/user"
+	user_handler "github.com/Skaifai/gophers-microservice/user-service/internal/app/handlers/user"
 	user_service "github.com/Skaifai/gophers-microservice/user-service/internal/app/service/user"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/app/storage/user/auth"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/app/storage/user/domain"
@@ -39,7 +39,7 @@ func main() {
 	ustg := user_storage.NewPSQL(db)
 
 	usvc := user_service.New(dstg, astg, pstg, ustg)
-	uhandler := user.New(usvc)
+	uhandler := user_handler.New(usvc)
 
 	srv := grpc.NewServer()
 	proto.RegisterUserServiceServer(srv, uhandler)

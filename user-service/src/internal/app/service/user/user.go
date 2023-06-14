@@ -2,9 +2,13 @@ package user
 
 import (
 	"context"
+	"errors"
+	"net/mail"
 
 	"github.com/Skaifai/gophers-microservice/user-service/internal/app/models/user"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/lib/e"
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type domain_storage interface {
@@ -12,6 +16,9 @@ type domain_storage interface {
 	UpdateDomain(context.Context, *user.Domain) (*user.Domain, error)
 	DeleteDomain(context.Context, string) error
 	GetDomain(context.Context, string) (*user.Domain, error)
+	GetDomainByUsername(ctx context.Context, username string) (_ *user.Domain, err error)
+	GetDomainByEmail(ctx context.Context, email string) (_ *user.Domain, err error)
+	GetDomainByEmailOrUsername(ctx context.Context, email string, username string) (_ *user.Domain, err error)
 }
 
 type auth_storage interface {
@@ -113,4 +120,69 @@ func (svc *userService) UpdateUser(ctx context.Context, u *user.User) (_ *user.U
 	}
 
 	return user.Assemble(*d, *a, *p), nil
+}
+
+func (svc *userService) Registrate(ctx context.Context, u *user.User) (*user.User, error) {
+	setPassword(u)
+
+	dom_user, _ := svc.dom.GetDomainByEmailOrUsername(ctx, u.Email, u.Username)
+	if dom_user != nil {
+		return nil, errors.New("user with this email or username already exists")
+	}
+
+	activation_string := uuid.New().String()
+
+	dom_user = &user.Domain{
+		Username: u.Username,
+		Email:    u.Email,
+	}
+
+	d, err := svc.dom.CreateDomain(ctx, dom_user)
+	if err != nil {
+		return nil, err
+	}
+
+	prof_user := user.Profile{
+		Domain:      d.ID,
+		FirstName:   u.FirstName,
+		LastName:    u.LastName,
+		PhoneNumber: u.PhoneNumber,
+		DOB:         u.DOB,
+		Address:     u.Address,
+		AboutMe:     u.AboutMe,
+		ProfPicURL:  u.ProfPicUrl,
+	}
+
+	auth_user := user.Auth{
+		Domain:         d.ID,
+		Password:       u.Password,
+		ActivationLink: activation_string,
+	}
+
+	a, err := svc.auth.CreateAuth(ctx, &auth_user)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := svc.prof.CreateProfile(ctx, &prof_user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user.Assemble(*d, *a, *p), nil
+}
+
+func isEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
+
+func setPassword(u *user.User) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
+	if err != nil {
+		return err
+	}
+
+	u.Password = string(hash)
+	return nil
 }

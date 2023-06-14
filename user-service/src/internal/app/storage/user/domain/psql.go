@@ -141,6 +141,81 @@ func (s *postgres) GetDomain(ctx context.Context, ID string) (_ *user.Domain, er
 	return pqToModel(&d), nil
 }
 
+func (s *postgres) GetDomainByUsername(ctx context.Context, username string) (_ *user.Domain, err error) {
+	var (
+		errmsg = `user.domain.storage.GetByID`
+		query  = `SELECT id, username, email, registration_date, version
+					FROM user_domains
+					WHERE username = $1;`
+	)
+
+	defer func() { err = e.WrapIfErr(errmsg, err) }()
+
+	var d pqdto
+
+	if err = s.DB.Conn().QueryRowxContext(ctx, query, username).Scan(&d.ID, &d.Username, &d.Email, &d.RegistrationDate, &d.Version); err != nil {
+
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, psql.ErrNoRecord
+		default:
+			return nil, err
+		}
+	}
+
+	return pqToModel(&d), nil
+}
+
+func (s *postgres) GetDomainByEmail(ctx context.Context, email string) (_ *user.Domain, err error) {
+	var (
+		errmsg = `user.domain.storage.GetByID`
+		query  = `SELECT id, username, email, registration_date, version
+					FROM user_domains
+					WHERE email = $1;`
+	)
+
+	defer func() { err = e.WrapIfErr(errmsg, err) }()
+
+	var d pqdto
+
+	if err = s.DB.Conn().QueryRowxContext(ctx, query, email).Scan(&d.ID, &d.Username, &d.Email, &d.RegistrationDate, &d.Version); err != nil {
+
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, psql.ErrNoRecord
+		default:
+			return nil, err
+		}
+	}
+
+	return pqToModel(&d), nil
+}
+
+func (s *postgres) GetDomainByEmailOrUsername(ctx context.Context, email string, username string) (_ *user.Domain, err error) {
+	var (
+		errmsg = `user.domain.storage.GetByID`
+		query  = `SELECT id, username, email, registration_date, version
+					FROM user_domains
+					WHERE email = $1 OR username $2;`
+	)
+
+	defer func() { err = e.WrapIfErr(errmsg, err) }()
+
+	var d pqdto
+
+	if err = s.DB.Conn().QueryRowxContext(ctx, query, email, username).Scan(&d.ID, &d.Username, &d.Email, &d.RegistrationDate, &d.Version); err != nil {
+
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, psql.ErrNoRecord
+		default:
+			return nil, err
+		}
+	}
+
+	return pqToModel(&d), nil
+}
+
 type pqdto struct {
 	ID               int64
 	Username         string

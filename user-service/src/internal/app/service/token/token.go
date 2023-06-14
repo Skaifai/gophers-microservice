@@ -14,7 +14,3 @@ type TokenClaims struct {
 	LoginTime time.Time `json:"login_time"`
 	jwt.RegisteredClaims
 }
-
-func calculateKey(userAgent, userID string, LoginTime time.Time) string {
-
-}

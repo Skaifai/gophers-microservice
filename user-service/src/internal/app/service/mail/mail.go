@@ -13,3 +13,18 @@ func New(mailer Mailer) *service {
 		mailer: mailer,
 	}
 }
+
+func (svc *service) SendActivationMail(firstname, email, activationUUID string) error {
+	data := map[string]any{
+		"name":  firstname,
+		"email": email,
+		"uuid":  activationUUID,
+	}
+
+	err := svc.mailer.Send(email, "user_welcome.tmpl", data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

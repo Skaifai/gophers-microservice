@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_Login_FullMethodName        = "/UserService/Login"
-	UserService_Registration_FullMethodName = "/UserService/Registration"
-	UserService_Logout_FullMethodName       = "/UserService/Logout"
-	UserService_Refresh_FullMethodName      = "/UserService/Refresh"
-	UserService_GetAllUsers_FullMethodName  = "/UserService/GetAllUsers"
-	UserService_GetUser_FullMethodName      = "/UserService/GetUser"
-	UserService_UpdateUser_FullMethodName   = "/UserService/UpdateUser"
-	UserService_DeleteUser_FullMethodName   = "/UserService/DeleteUser"
+	UserService_Login_FullMethodName          = "/UserService/Login"
+	UserService_Registration_FullMethodName   = "/UserService/Registration"
+	UserService_Logout_FullMethodName         = "/UserService/Logout"
+	UserService_Refresh_FullMethodName        = "/UserService/Refresh"
+	UserService_IsLogged_FullMethodName       = "/UserService/IsLogged"
+	UserService_GetUserByToken_FullMethodName = "/UserService/GetUserByToken"
+	UserService_GetAllUsers_FullMethodName    = "/UserService/GetAllUsers"
+	UserService_GetUser_FullMethodName        = "/UserService/GetUser"
+	UserService_UpdateUser_FullMethodName     = "/UserService/UpdateUser"
+	UserService_DeleteUser_FullMethodName     = "/UserService/DeleteUser"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -37,6 +39,8 @@ type UserServiceClient interface {
 	Registration(ctx context.Context, in *RegistrationRequest, opts ...grpc.CallOption) (*RegistrationResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*RefreshResponse, error)
+	IsLogged(ctx context.Context, in *IsLoggedRequest, opts ...grpc.CallOption) (*IsLoggedResponse, error)
+	GetUserByToken(ctx context.Context, in *GetUserByTokenRequest, opts ...grpc.CallOption) (*GetUserByTokenResponse, error)
 	GetAllUsers(ctx context.Context, in *GetAllUsersRequest, opts ...grpc.CallOption) (*GetAllUsersResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
@@ -87,6 +91,24 @@ func (c *userServiceClient) Refresh(ctx context.Context, in *RefreshRequest, opt
 	return out, nil
 }
 
+func (c *userServiceClient) IsLogged(ctx context.Context, in *IsLoggedRequest, opts ...grpc.CallOption) (*IsLoggedResponse, error) {
+	out := new(IsLoggedResponse)
+	err := c.cc.Invoke(ctx, UserService_IsLogged_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUserByToken(ctx context.Context, in *GetUserByTokenRequest, opts ...grpc.CallOption) (*GetUserByTokenResponse, error) {
+	out := new(GetUserByTokenResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUserByToken_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) GetAllUsers(ctx context.Context, in *GetAllUsersRequest, opts ...grpc.CallOption) (*GetAllUsersResponse, error) {
 	out := new(GetAllUsersResponse)
 	err := c.cc.Invoke(ctx, UserService_GetAllUsers_FullMethodName, in, out, opts...)
@@ -131,6 +153,8 @@ type UserServiceServer interface {
 	Registration(context.Context, *RegistrationRequest) (*RegistrationResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error)
+	IsLogged(context.Context, *IsLoggedRequest) (*IsLoggedResponse, error)
+	GetUserByToken(context.Context, *GetUserByTokenRequest) (*GetUserByTokenResponse, error)
 	GetAllUsers(context.Context, *GetAllUsersRequest) (*GetAllUsersResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
@@ -153,6 +177,12 @@ func (UnimplementedUserServiceServer) Logout(context.Context, *LogoutRequest) (*
 }
 func (UnimplementedUserServiceServer) Refresh(context.Context, *RefreshRequest) (*RefreshResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
+}
+func (UnimplementedUserServiceServer) IsLogged(context.Context, *IsLoggedRequest) (*IsLoggedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsLogged not implemented")
+}
+func (UnimplementedUserServiceServer) GetUserByToken(context.Context, *GetUserByTokenRequest) (*GetUserByTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserByToken not implemented")
 }
 func (UnimplementedUserServiceServer) GetAllUsers(context.Context, *GetAllUsersRequest) (*GetAllUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllUsers not implemented")
@@ -251,6 +281,42 @@ func _UserService_Refresh_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_IsLogged_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsLoggedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).IsLogged(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_IsLogged_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).IsLogged(ctx, req.(*IsLoggedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUserByToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserByTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUserByToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUserByToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUserByToken(ctx, req.(*GetUserByTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_GetAllUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetAllUsersRequest)
 	if err := dec(in); err != nil {
@@ -345,6 +411,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Refresh",
 			Handler:    _UserService_Refresh_Handler,
+		},
+		{
+			MethodName: "IsLogged",
+			Handler:    _UserService_IsLogged_Handler,
+		},
+		{
+			MethodName: "GetUserByToken",
+			Handler:    _UserService_GetUserByToken_Handler,
 		},
 		{
 			MethodName: "GetAllUsers",

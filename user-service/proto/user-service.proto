@@ -9,11 +9,34 @@ service UserService {
     rpc Logout(LogoutRequest) returns (LogoutResponse);
     rpc Refresh(RefreshRequest) returns (RefreshResponse);
 
+    rpc IsLogged(IsLoggedRequest) returns (IsLoggedResponse);
+    rpc GetUserByToken(GetUserByTokenRequest) returns(GetUserByTokenResponse);
+
     rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse);
     rpc GetUser(GetUserRequest) returns (GetUserResponse);
     rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
     rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 } 
+
+message IsLoggedRequest {
+    string accessToken = 1;
+    string userAgent = 2;
+}
+
+message IsLoggedResponse {
+    bool isLogged = 1;
+    int64 status = 2;
+}
+
+message GetUserByTokenRequest {
+    string accessToken = 1;
+    string userAgent = 2;
+}
+
+message GetUserByTokenResponse {
+    User user = 1;
+    int64 status = 2;
+}
 
 message GetAllUsersRequest {
     int64 limit = 1;

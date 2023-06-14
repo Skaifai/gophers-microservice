@@ -15,7 +15,7 @@ type ProductModel struct {
 	DB *sql.DB
 }
 
-func (p ProductModel) Insert(product *proto.Product) (int64, error) {
+func (p ProductModel) Insert(product *proto.Product) (*proto.Product, error) {
 	query := `INSERT INTO products (name, price, description, category, quantity, is_available)
 			  VALUES ($1, $2, $3, $4, $5, $6)
 	          RETURNING id, creation_date, version`
@@ -35,11 +35,11 @@ func (p ProductModel) Insert(product *proto.Product) (int64, error) {
 	var creationDate time.Time
 	err := p.DB.QueryRowContext(ctx, query, args...).Scan(&product.Id, &creationDate, &product.Version)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	product.CreationDate = timestamppb.New(creationDate)
 
-	return product.Id, nil
+	return product, nil
 }
 
 func (p ProductModel) Get(id int64) (*proto.Product, error) {
@@ -52,6 +52,7 @@ func (p ProductModel) Get(id int64) (*proto.Product, error) {
 		      WHERE id = $1`
 
 	var product proto.Product
+	var creationDate time.Time
 	err := p.DB.QueryRow(query, id).Scan(
 		&product.Id,
 		&product.Name,
@@ -59,9 +60,11 @@ func (p ProductModel) Get(id int64) (*proto.Product, error) {
 		&product.Description,
 		&product.Category,
 		&product.IsAvailable,
-		&product.CreationDate,
+		&creationDate,
 		&product.Version,
 	)
+
+	product.CreationDate = timestamppb.New(creationDate)
 
 	if err != nil {
 		switch {

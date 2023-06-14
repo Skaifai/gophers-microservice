@@ -35,13 +35,13 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *jsonlog.Logger
-	wg     sync.WaitGroup
+	config               config
+	logger               *jsonlog.Logger
+	wg                   sync.WaitGroup
+	productServiceClient productServiceProto.ProductServiceClient
 }
 
 var productServiceConnection *grpc.ClientConn
-var productServiceClient productServiceProto.ProductServiceClient
 var rmqDSN string
 
 func getEnvVarString(key string) string {
@@ -87,20 +87,20 @@ func main() {
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Could not set up a connection to the message broker")
 	defer conn.Close()
-	
+
 	// Logger
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo, rmqDSN)
-
-	app := &application{
-		config: cfg,
-		logger: logger,
-	}
 
 	// Product service
 	productServiceConnection, err = grpc.Dial(fmt.Sprintf(":%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	failOnError(err, "Could not set up a connection to the Product service")
 	defer productServiceConnection.Close()
-	productServiceClient = productServiceProto.NewProductServiceClient(productServiceConnection)
+
+	app := &application{
+		config:               cfg,
+		logger:               logger,
+		productServiceClient: productServiceProto.NewProductServiceClient(productServiceConnection),
+	}
 
 	err = app.serve()
 	if err != nil {

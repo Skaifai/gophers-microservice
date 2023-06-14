@@ -44,7 +44,7 @@ func (app *application) addProductHandler(w http.ResponseWriter, r *http.Request
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	response, err := productServiceClient.AddProduct(ctx, &productServiceProto.AddProductRequest{
+	response, err := app.productServiceClient.AddProduct(ctx, &productServiceProto.AddProductRequest{
 		Product: product,
 	})
 	if err != nil {
@@ -77,7 +77,7 @@ func (app *application) showProductHandler(w http.ResponseWriter, r *http.Reques
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	product, err := productServiceClient.ShowProduct(ctx, &productServiceProto.ShowProductRequest{
+	product, err := app.productServiceClient.ShowProduct(ctx, &productServiceProto.ShowProductRequest{
 		Id: id,
 	})
 	if err != nil {
@@ -131,7 +131,7 @@ func (app *application) listProductsHandler(w http.ResponseWriter, r *http.Reque
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	response, err := productServiceClient.ListProducts(ctx, &productServiceProto.ListProductsRequest{
+	response, err := app.productServiceClient.ListProducts(ctx, &productServiceProto.ListProductsRequest{
 		Name:     input.Name,
 		Category: input.Category,
 		Filters:  &input.Filters,
@@ -175,7 +175,7 @@ func (app *application) updateProductHandler(w http.ResponseWriter, r *http.Requ
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	productFromDB, err := productServiceClient.ShowProduct(ctx, &productServiceProto.ShowProductRequest{
+	productFromDB, err := app.productServiceClient.ShowProduct(ctx, &productServiceProto.ShowProductRequest{
 		Id: id,
 	})
 	if err != nil {
@@ -235,7 +235,7 @@ func (app *application) updateProductHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	response, err := productServiceClient.UpdateProduct(ctx, &productServiceProto.UpdateProductRequest{
+	response, err := app.productServiceClient.UpdateProduct(ctx, &productServiceProto.UpdateProductRequest{
 		Product: product,
 	})
 	if err != nil {
@@ -281,7 +281,7 @@ func (app *application) deleteProductHandler(w http.ResponseWriter, r *http.Requ
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := productServiceClient.DeleteProduct(ctx, &productServiceProto.DeleteProductRequest{
+	response, err := app.productServiceClient.DeleteProduct(ctx, &productServiceProto.DeleteProductRequest{
 		Id: id,
 	})
 	if err != nil {

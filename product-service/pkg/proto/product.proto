@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
 
 option go_package = "github.com/Skaifai/gophers-microservice/product-service/pkg/proto";
 
@@ -17,9 +16,24 @@ message Product {
   int32 version = 9;
 }
 
+message Filters {
+  int32 page = 1;
+  int32 page_size = 2;
+  string sort = 3;
+  repeated string sort_safe_list = 4;
+}
+
+message Metadata {
+  int32 current_page = 1;
+  int32 page_size = 2;
+  int32 first_page = 3;
+  int32 last_page = 4;
+  int32 total_records = 5;
+}
+
 service ProductService {
   rpc ShowProduct(ShowProductRequest) returns (ShowProductResponse);
-  rpc ListProducts(google.protobuf.Empty) returns (ListProductsResponse);
+  rpc ListProducts(ListProductsRequest) returns (ListProductsResponse);
   rpc AddProduct(AddProductRequest) returns (AddProductResponse);
   rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse);
   rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse);
@@ -34,7 +48,14 @@ message ShowProductResponse {
 }
 
 message ListProductsResponse {
-  repeated Product products = 1;
+  Metadata metadata = 1;
+  repeated Product products = 2;
+}
+
+message ListProductsRequest {
+  string name = 1;
+  string category = 2;
+  Filters filters = 3;
 }
 
 message AddProductRequest {

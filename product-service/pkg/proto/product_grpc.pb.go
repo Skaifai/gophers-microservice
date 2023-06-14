@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -24,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProductServiceClient interface {
 	ShowProduct(ctx context.Context, in *ShowProductRequest, opts ...grpc.CallOption) (*ShowProductResponse, error)
-	ListProducts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListProductsResponse, error)
+	ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error)
 	AddProduct(ctx context.Context, in *AddProductRequest, opts ...grpc.CallOption) (*AddProductResponse, error)
 	UpdateProduct(ctx context.Context, in *UpdateProductRequest, opts ...grpc.CallOption) (*UpdateProductResponse, error)
 	DeleteProduct(ctx context.Context, in *DeleteProductRequest, opts ...grpc.CallOption) (*DeleteProductResponse, error)
@@ -47,7 +46,7 @@ func (c *productServiceClient) ShowProduct(ctx context.Context, in *ShowProductR
 	return out, nil
 }
 
-func (c *productServiceClient) ListProducts(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListProductsResponse, error) {
+func (c *productServiceClient) ListProducts(ctx context.Context, in *ListProductsRequest, opts ...grpc.CallOption) (*ListProductsResponse, error) {
 	out := new(ListProductsResponse)
 	err := c.cc.Invoke(ctx, "/ProductService/ListProducts", in, out, opts...)
 	if err != nil {
@@ -88,7 +87,7 @@ func (c *productServiceClient) DeleteProduct(ctx context.Context, in *DeleteProd
 // for forward compatibility
 type ProductServiceServer interface {
 	ShowProduct(context.Context, *ShowProductRequest) (*ShowProductResponse, error)
-	ListProducts(context.Context, *emptypb.Empty) (*ListProductsResponse, error)
+	ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error)
 	AddProduct(context.Context, *AddProductRequest) (*AddProductResponse, error)
 	UpdateProduct(context.Context, *UpdateProductRequest) (*UpdateProductResponse, error)
 	DeleteProduct(context.Context, *DeleteProductRequest) (*DeleteProductResponse, error)
@@ -102,7 +101,7 @@ type UnimplementedProductServiceServer struct {
 func (UnimplementedProductServiceServer) ShowProduct(context.Context, *ShowProductRequest) (*ShowProductResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShowProduct not implemented")
 }
-func (UnimplementedProductServiceServer) ListProducts(context.Context, *emptypb.Empty) (*ListProductsResponse, error) {
+func (UnimplementedProductServiceServer) ListProducts(context.Context, *ListProductsRequest) (*ListProductsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListProducts not implemented")
 }
 func (UnimplementedProductServiceServer) AddProduct(context.Context, *AddProductRequest) (*AddProductResponse, error) {
@@ -146,7 +145,7 @@ func _ProductService_ShowProduct_Handler(srv interface{}, ctx context.Context, d
 }
 
 func _ProductService_ListProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(ListProductsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -158,7 +157,7 @@ func _ProductService_ListProducts_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: "/ProductService/ListProducts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductServiceServer).ListProducts(ctx, req.(*emptypb.Empty))
+		return srv.(ProductServiceServer).ListProducts(ctx, req.(*ListProductsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

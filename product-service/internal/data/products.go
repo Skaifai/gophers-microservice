@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
@@ -76,6 +77,60 @@ func (p ProductModel) Get(id int64) (*proto.Product, error) {
 	}
 
 	return &product, nil
+}
+
+func (p ProductModel) GetAll(name string, category string, filters *proto.Filters) ([]*proto.Product, *proto.Metadata, error) {
+	query := fmt.Sprintf(`
+		SELECT count(*) OVER(), id, name, price, description, category, is_available, creation_date, version
+		FROM products
+		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		AND (to_tsvector('simple', category) @@ plainto_tsquery('simple', $2) OR $2 = '')
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4`, sortColumn(filters), sortDirection(filters))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	args := []any{name, category, limit(filters), offset(filters)}
+
+	rows, err := p.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, &proto.Metadata{}, err
+	}
+
+	defer rows.Close()
+
+	var totalRecords int32 = 0
+
+	var products []*proto.Product
+
+	for rows.Next() {
+		var product proto.Product
+		var creationDate time.Time
+		err := rows.Scan(
+			&totalRecords,
+			&product.Id,
+			&product.Name,
+			&product.Price,
+			&product.Description,
+			&product.Category,
+			&product.IsAvailable,
+			&creationDate,
+			&product.Version,
+		)
+		product.CreationDate = timestamppb.New(creationDate)
+		if err != nil {
+			return nil, &proto.Metadata{}, err
+		}
+		products = append(products, &product)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, &proto.Metadata{}, err
+	}
+	metadata := calculateMetadata(totalRecords, filters)
+	return products, metadata, nil
 }
 
 func (p ProductModel) Update(product *proto.Product) error {

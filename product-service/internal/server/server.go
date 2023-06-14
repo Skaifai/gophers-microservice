@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/Skaifai/gophers-microservice/product-service/internal/data"
@@ -25,11 +26,26 @@ func NewServer(db *sql.DB) *Server {
 func (s *Server) ShowProduct(ctx context.Context, req *proto.ShowProductRequest) (*proto.ShowProductResponse, error) {
 	product, err := s.Products.Get(req.GetId())
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "Product not found: %v", err)
+		if errors.Is(err, data.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "Product not found: %v", err)
+		}
+		return nil, status.Errorf(codes.Internal, "Failed to retrieve product: %v", err)
 	}
 
 	return &proto.ShowProductResponse{
 		Product: product,
+	}, nil
+}
+
+func (s *Server) ListProducts(ctx context.Context, req *proto.ListProductsRequest) (*proto.ListProductsResponse, error) {
+	products, metadata, err := s.Products.GetAll(req.GetName(), req.GetCategory(), req.GetFilters())
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Failed to get products: %v", err)
+	}
+
+	return &proto.ListProductsResponse{
+		Metadata: metadata,
+		Products: products,
 	}, nil
 }
 
@@ -61,6 +77,9 @@ func (s *Server) UpdateProduct(ctx context.Context, req *proto.UpdateProductRequ
 func (s *Server) DeleteProduct(ctx context.Context, req *proto.DeleteProductRequest) (*proto.DeleteProductResponse, error) {
 	err := s.Products.Delete(req.GetId())
 	if err != nil {
+		if errors.Is(err, data.ErrRecordNotFound) {
+			return nil, status.Errorf(codes.NotFound, "Product not found: %v", err)
+		}
 		return nil, status.Errorf(codes.Internal, "Failed to delete product: %v", err)
 	}
 

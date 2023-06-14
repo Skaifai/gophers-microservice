@@ -8,7 +8,48 @@ service UserService {
     rpc Registration(RegistrationRequest) returns (RegistrationResponse);
     rpc Logout(LogoutRequest) returns (LogoutResponse);
     rpc Refresh(RefreshRequest) returns (RefreshResponse);
+
+    rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
 } 
+
+message GetAllUsersRequest {
+    int64 limit = 1;
+    int64 offset = 2;
+}
+
+message GetAllUsersResponse {
+    repeated User users = 1;
+    int64 status = 2;
+}
+
+message GetUserRequest {
+    int64 id = 1;
+}
+
+message GetUserResponse {
+    User user = 1;
+    int64 status = 2;
+}
+
+message UpdateUserRequest {
+    User user = 1;
+}
+
+message UpdateUserResponse {
+    User user = 1;
+    int64 status = 2;
+}
+
+message DeleteUserRequest {
+    int64 id = 1;
+}
+
+message DeleteUserResponse {
+    int64 status = 1;
+}
 
 // User-Agent: grab from http headers
 message LoginRequest {

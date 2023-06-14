@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Skaifai/gophers-microservice/product-service/config"
+	"github.com/Skaifai/gophers-microservice/product-service/internal/logger"
 	"github.com/Skaifai/gophers-microservice/product-service/internal/server"
 	"github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	_ "github.com/lib/pq"
@@ -31,8 +32,14 @@ func main() {
 	}
 	defer db.Close()
 
+	publisher, err := logger.NewPublisher()
+	if err != nil {
+		log.Fatalf("failed to create publisher: %v", err)
+	}
+	defer publisher.Close()
+
 	srv := grpc.NewServer()
-	proto.RegisterProductServiceServer(srv, server.NewServer(db))
+	proto.RegisterProductServiceServer(srv, server.NewServer(db, publisher))
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

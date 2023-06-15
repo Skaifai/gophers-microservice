@@ -1,10 +1,10 @@
 package main
 
 import (
-	"api-gateway/internal/validator"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Skaifai/gophers-microservice/api-gateway/internal/validator"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"github.com/julienschmidt/httprouter"
 	"io"

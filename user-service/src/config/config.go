@@ -41,7 +41,7 @@ var SMTP = smtp{
 }
 
 var DB = db{
-	DSN: "postgres://postgres:1210@localhost:5433/gophers_microservice?sslmode=disable",
+	DSN: "postgres://postgres:1210@localhost:5433/gophers-microservice?sslmode=disable",
 }
 
 var SERVER = server{

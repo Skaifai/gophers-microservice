@@ -83,7 +83,7 @@ func main() {
 	flag.Parse()
 
 	// RabbitMQ
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%d/", cfg.rmq.username, cfg.rmq.password, cfg.rmq.port)
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%s/", cfg.rmq.username, cfg.rmq.password, getEnvVarString("RMQ_PORT"))
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Could not set up a connection to the message broker")
 	defer conn.Close()

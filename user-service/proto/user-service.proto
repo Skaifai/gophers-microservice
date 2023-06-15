@@ -28,8 +28,7 @@ message ActivateResponse {
 }
 
 message IsLoggedRequest {
-    string accessToken = 1;
-    string userAgent = 2;
+    string refreshToken = 1;
 }
 
 message IsLoggedResponse {
@@ -117,7 +116,6 @@ message RegistrationResponse {
 //refresh-token: grab from cookies, User-Agent: grab from http headers
 message LogoutRequest {
     string refreshToken = 1;
-    string userAgent = 2;
 }
 
 message LogoutResponse {

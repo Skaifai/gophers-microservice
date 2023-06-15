@@ -51,8 +51,8 @@ func (s *postgres) UpdateAuth(ctx context.Context, u *user.Auth) (_ *user.Auth, 
 		errmsg = `user.auth.storage.Update`
 		query  = `
 				UPDATE user_auths
-				SET password = $1, activated = $2
-				WHERE domain_user_id = $3
+				SET password = $1
+				WHERE domain_user_id = $2
 				RETURNING activated;
 		`
 	)
@@ -64,12 +64,35 @@ func (s *postgres) UpdateAuth(ctx context.Context, u *user.Auth) (_ *user.Auth, 
 		return nil, err
 	}
 
-	args := []any{a.Password, a.Activated, a.Domain}
+	args := []any{a.Password, a.Domain}
 	if err := s.DB.Conn().QueryRowxContext(ctx, query, args...).Scan(&a.Activated); err != nil {
 		return nil, err
 	}
 
 	return pqToModel(a), nil
+}
+
+func (s *postgres) Activate(ctx context.Context, activation_link string) (activated bool, err error) {
+	var (
+		errmsg = `user.auth.storage.Activate`
+
+		query = `
+				UPDATE user_auths
+				SET activated = true
+				WHERE activation_link = $1
+				RETURNING activated;
+		`
+	)
+
+	activated = false
+
+	defer func() { err = e.WrapIfErr(errmsg, err) }()
+
+	if err := s.DB.Conn().QueryRowxContext(ctx, query, activation_link).Scan(&activated); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (s *postgres) DeleteAuth(ctx context.Context, Domain string) (err error) {

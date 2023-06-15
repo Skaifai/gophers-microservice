@@ -236,12 +236,12 @@ func pqToModel(u *pqdto) *user.Domain {
 
 func pqFromModel(u *user.Domain) (*pqdto, error) {
 	id, err := helpers.Atoi64(u.ID)
-	if err != nil {
+	if err != nil && u.ID != "" {
 		return nil, errors.New("can't parse")
 	}
 
 	version, err := helpers.Atoi64(u.Version)
-	if err != nil {
+	if err != nil && u.Version != "" {
 		return nil, errors.New("can't parse")
 	}
 

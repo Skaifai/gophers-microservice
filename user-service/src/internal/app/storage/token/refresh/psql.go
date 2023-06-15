@@ -68,6 +68,33 @@ func (s *postgres) Update(ctx context.Context, t *token.Refresh) (_ *token.Refre
 	return pqToModel(r), nil
 }
 
+func (s *postgres) DeleteRefresh(ctx context.Context, refreshToken string) (err error) {
+	var (
+		errmsg = `token.refresh.storage.DeleteRefresh`
+		query  = `DELETE FROM refresh_tokens
+					WHERE token_string = $1;`
+	)
+
+	defer func() { err = e.WrapIfErr(errmsg, err) }()
+
+	res, err := s.DB.Conn().ExecContext(ctx, query, refreshToken)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return psql.ErrNoRecord
+	}
+
+	return nil
+
+}
+
 func (s *postgres) DeleteByKey(ctx context.Context, key string) (err error) {
 	var (
 		errmsg = `token.refresh.storage.DeleteByKey`
@@ -107,6 +134,31 @@ func (s *postgres) GetByKey(ctx context.Context, key string) (_ *token.Refresh, 
 	var r pqdto
 
 	if err = s.DB.Conn().QueryRowxContext(ctx, query, key).Scan(&r.Key, &r.CreatedAt, &r.TokenString); err != nil {
+
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, psql.ErrNoRecord
+		default:
+			return nil, err
+		}
+	}
+
+	return pqToModel(&r), nil
+}
+
+func (s *postgres) Get(ctx context.Context, tokenString string) (_ *token.Refresh, err error) {
+	var (
+		errmsg = `token.refresh.storage.GetByKey`
+		query  = `SELECT key, created_at, token_string
+					FROM refresh_tokens
+					WHERE token_string = $1`
+	)
+
+	defer func() { err = e.WrapIfErr(errmsg, err) }()
+
+	var r pqdto
+
+	if err = s.DB.Conn().QueryRowxContext(ctx, query, tokenString).Scan(&r.Key, &r.CreatedAt, &r.TokenString); err != nil {
 
 		switch {
 		case errors.Is(err, sql.ErrNoRows):

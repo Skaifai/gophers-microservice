@@ -1,9 +1,9 @@
 package main
 
 import (
-	"api-gateway/internal/jsonlog"
 	"flag"
 	"fmt"
+	"github.com/Skaifai/gophers-microservice/api-gateway/internal/jsonlog"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"

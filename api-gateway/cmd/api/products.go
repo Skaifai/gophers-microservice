@@ -1,9 +1,9 @@
 package main
 
 import (
-	"api-gateway/internal/validator"
 	"context"
 	"fmt"
+	"github.com/Skaifai/gophers-microservice/api-gateway/internal/validator"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

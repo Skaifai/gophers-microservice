@@ -2,9 +2,8 @@ version: '3'
 
 services:
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:3-management
     container_name: rabbitmq
-    restart: always
     environment:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
@@ -22,7 +21,9 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=gophers-microservice
     ports:
-      - "5436:5432"
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   product-service:
     build:
@@ -55,3 +56,6 @@ services:
       - product-service
     ports:
       - "7001:7001"
+
+volumes:
+  pgdata:

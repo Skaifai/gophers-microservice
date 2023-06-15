@@ -15,7 +15,10 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
+
+# Folder with logs
+log-files/
 
 # Go workspace file
 go.work
@@ -28,6 +31,5 @@ go.work
 /build/
 /dist/
 /out/
-rabbitmq/
-vendor/
-logger-service/log-files/
+
+.env

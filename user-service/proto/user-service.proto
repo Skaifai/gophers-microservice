@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+option go_package = "./proto";
+
+service UserService {
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc Registration(RegistrationRequest) returns (RegistrationResponse);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
+    rpc Activate(ActivateRequest) returns (ActivateResponse);
+    rpc Refresh(RefreshRequest) returns (RefreshResponse);
+
+    rpc IsLogged(IsLoggedRequest) returns (IsLoggedResponse);
+    rpc GetUserByToken(GetUserByTokenRequest) returns(GetUserByTokenResponse);
+
+    rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+} 
+
+message ActivateRequest {
+   string activationString = 1; 
+}
+
+message ActivateResponse {
+    bool activated = 1;
+}
+
+message IsLoggedRequest {
+    string refreshToken = 1;
+}
+
+message IsLoggedResponse {
+    bool isLogged = 1;
+    int64 status = 2;
+}
+
+message GetUserByTokenRequest {
+    string accessToken = 1;
+    string userAgent = 2;
+}
+
+message GetUserByTokenResponse {
+    User user = 1;
+    int64 status = 2;
+}
+
+message GetAllUsersRequest {
+    int64 limit = 1;
+    int64 offset = 2;
+}
+
+message GetAllUsersResponse {
+    repeated User users = 1;
+    int64 status = 2;
+}
+
+message GetUserRequest {
+    int64 id = 1;
+}
+
+message GetUserResponse {
+    User user = 1;
+    int64 status = 2;
+}
+
+message UpdateUserRequest {
+    User user = 1;
+}
+
+message UpdateUserResponse {
+    User user = 1;
+    int64 status = 2;
+}
+
+message DeleteUserRequest {
+    int64 id = 1;
+}
+
+message DeleteUserResponse {
+    int64 status = 1;
+}
+
+// User-Agent: grab from http headers
+message LoginRequest {
+    string key = 1;
+    string userAgent = 2;
+    string password = 3;
+}
+
+//refresh-token: save into cookies, access-token: send to client
+message LoginResponse {
+    tokens tokens = 1;
+    int64 status = 2;
+}
+
+message RegistrationRequest {
+    string email = 1;
+    string username = 2;
+    string firstName = 3;
+    string lastName = 4;
+    string phoneNumber = 5;
+    google.protobuf.Timestamp DOB = 6;
+    string address = 7;
+    string aboutMe = 8;
+    string profPicURL = 9;
+    string password = 10;
+}
+
+message RegistrationResponse {
+    User userdata = 1;
+    int64 status = 2;
+}
+
+//refresh-token: grab from cookies, User-Agent: grab from http headers
+message LogoutRequest {
+    string refreshToken = 1;
+}
+
+message LogoutResponse {
+    int64 status = 1;
+}
+
+//refresh-token: grab from cookies, User-Agent: grab from http headers
+message RefreshRequest {
+    string refreshToken = 1;
+    string userAgent = 2;
+}
+
+//send access token to client
+message RefreshResponse {
+    tokens accessToken = 1;
+    int64 status = 2;
+}
+
+message tokens {
+    string RefreshToken = 1;
+    string AccessToken = 2;
+}
+
+message User {
+    string id = 1;
+    string userRole = 2;
+    string username = 3;
+    string email = 4;
+    string password = 5;
+    google.protobuf.Timestamp registrationDate = 6; 
+    string firstName = 7;
+    string lastName = 8;
+    string phoneNumber = 9;
+    google.protobuf.Timestamp DOB = 10;
+    string address = 11;
+    string aboutMe = 12;
+    string profPicURL = 13;
+    bool   activated = 14;
+    string version = 15;
+}

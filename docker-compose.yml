@@ -12,6 +12,8 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+    networks:
+      - network
 
   postgres:
     image: postgres
@@ -24,6 +26,8 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - network
 
   product-service:
     build:
@@ -35,6 +39,8 @@ services:
       - rabbitmq
     ports:
       - "8080:8080"
+    networks:
+      - network
 
   logger-service:
     build:
@@ -45,6 +51,10 @@ services:
       - rabbitmq
     ports:
       - "6000:6000"
+    stdin_open: true
+    tty: true
+    networks:
+      - network
 
   api-gateway:
     build:
@@ -56,6 +66,13 @@ services:
       - product-service
     ports:
       - "7001:7001"
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
 
 volumes:
   pgdata:
+

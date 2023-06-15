@@ -35,7 +35,7 @@ func main() {
 
 	flag.Parse()
 
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@rabbitmq:%d/", getEnvVarString("RMQ_USERNAME"), getEnvVarString("RMQ_PASSWORD"), cfg.rmqPort)
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.rmqUsername, cfg.rmqPassword, "rabbitmq", cfg.rmqPort)
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()

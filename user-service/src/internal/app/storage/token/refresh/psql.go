@@ -4,12 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/Skaifai/gophers-microservice/user-service/internal/app/models/token"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/lib/clients/psql"
 	"github.com/Skaifai/gophers-microservice/user-service/internal/lib/e"
 )
+
+const TimeFormat = "2006-01-02 15:04:05.999999999"
 
 type postgres struct {
 	DB *psql.DB
@@ -21,7 +24,7 @@ func NewPSQL(db *psql.DB) *postgres {
 	}
 }
 
-func (s *postgres) Create(ctx context.Context, t *token.Refresh) (_ *token.Refresh, err error) {
+func (s *postgres) Create(ctx context.Context, t *token.AuthToken) (_ *token.AuthToken, err error) {
 	var (
 		errmsg = `token.refresh.storage.Create`
 		query  = `INSERT INTO refresh_tokens (key, token_string)
@@ -40,10 +43,10 @@ func (s *postgres) Create(ctx context.Context, t *token.Refresh) (_ *token.Refre
 		return nil, err
 	}
 
-	return pqToModel(r), err
+	return pqToModel(r)
 }
 
-func (s *postgres) Update(ctx context.Context, t *token.Refresh) (_ *token.Refresh, err error) {
+func (s *postgres) Update(ctx context.Context, t *token.AuthToken) (_ *token.AuthToken, err error) {
 	var (
 		errmsg = `token.refresh.storage.Update`
 		query  = `
@@ -65,37 +68,10 @@ func (s *postgres) Update(ctx context.Context, t *token.Refresh) (_ *token.Refre
 		return nil, err
 	}
 
-	return pqToModel(r), nil
+	return pqToModel(r)
 }
 
-func (s *postgres) DeleteRefresh(ctx context.Context, refreshToken string) (err error) {
-	var (
-		errmsg = `token.refresh.storage.DeleteRefresh`
-		query  = `DELETE FROM refresh_tokens
-					WHERE token_string = $1;`
-	)
-
-	defer func() { err = e.WrapIfErr(errmsg, err) }()
-
-	res, err := s.DB.Conn().ExecContext(ctx, query, refreshToken)
-	if err != nil {
-		return err
-	}
-
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowsAffected == 0 {
-		return psql.ErrNoRecord
-	}
-
-	return nil
-
-}
-
-func (s *postgres) DeleteByKey(ctx context.Context, key string) (err error) {
+func (s *postgres) DeleteByKey(ctx context.Context, t *token.AuthToken) (err error) {
 	var (
 		errmsg = `token.refresh.storage.DeleteByKey`
 		query  = `DELETE FROM refresh_tokens
@@ -104,7 +80,9 @@ func (s *postgres) DeleteByKey(ctx context.Context, key string) (err error) {
 
 	defer func() { err = e.WrapIfErr(errmsg, err) }()
 
-	res, err := s.DB.Conn().ExecContext(ctx, query, key)
+	k := keyFromModel(t)
+
+	res, err := s.DB.Conn().ExecContext(ctx, query, k)
 	if err != nil {
 		return err
 	}
@@ -121,7 +99,7 @@ func (s *postgres) DeleteByKey(ctx context.Context, key string) (err error) {
 	return nil
 }
 
-func (s *postgres) GetByKey(ctx context.Context, key string) (_ *token.Refresh, err error) {
+func (s *postgres) GetByKey(ctx context.Context, t *token.AuthToken) (_ *token.AuthToken, err error) {
 	var (
 		errmsg = `token.refresh.storage.GetByKey`
 		query  = `SELECT key, created_at, token_string
@@ -131,10 +109,9 @@ func (s *postgres) GetByKey(ctx context.Context, key string) (_ *token.Refresh, 
 
 	defer func() { err = e.WrapIfErr(errmsg, err) }()
 
-	var r pqdto
+	var r pqdto = *pqFromModel(t)
 
-	if err = s.DB.Conn().QueryRowxContext(ctx, query, key).Scan(&r.Key, &r.CreatedAt, &r.TokenString); err != nil {
-
+	if err = s.DB.Conn().QueryRowxContext(ctx, query, r.Key).Scan(&r.Key, &r.CreatedAt, &r.TokenString); err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
 			return nil, psql.ErrNoRecord
@@ -143,32 +120,7 @@ func (s *postgres) GetByKey(ctx context.Context, key string) (_ *token.Refresh, 
 		}
 	}
 
-	return pqToModel(&r), nil
-}
-
-func (s *postgres) Get(ctx context.Context, tokenString string) (_ *token.Refresh, err error) {
-	var (
-		errmsg = `token.refresh.storage.GetByKey`
-		query  = `SELECT key, created_at, token_string
-					FROM refresh_tokens
-					WHERE token_string = $1`
-	)
-
-	defer func() { err = e.WrapIfErr(errmsg, err) }()
-
-	var r pqdto
-
-	if err = s.DB.Conn().QueryRowxContext(ctx, query, tokenString).Scan(&r.Key, &r.CreatedAt, &r.TokenString); err != nil {
-
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, psql.ErrNoRecord
-		default:
-			return nil, err
-		}
-	}
-
-	return pqToModel(&r), nil
+	return pqToModel(&r)
 }
 
 type pqdto struct {
@@ -177,17 +129,53 @@ type pqdto struct {
 	TokenString string
 }
 
-func pqToModel(t *pqdto) *token.Refresh {
-	return &token.Refresh{
-		Key:         t.Key,
-		CreatedAt:   t.CreatedAt,
-		TokenString: t.TokenString,
+func keyFromModel(t *token.AuthToken) *key {
+	return &key{
+		HostIdentifier: t.HostIdentifier,
+		UserID:         t.UserID,
+		CreatedAt:      t.CreatedAt.String(),
 	}
 }
 
-func pqFromModel(t *token.Refresh) *pqdto {
+type key struct {
+	HostIdentifier string
+	UserID         string
+	CreatedAt      string
+}
+
+func (k *key) compose_key() string {
+	return strings.Join([]string{k.HostIdentifier, k.UserID, k.CreatedAt}, "-")
+}
+
+func (k *key) decompose_key(composed_key string) {
+	keys := strings.Fields(composed_key)
+
+	k.HostIdentifier = keys[0]
+	k.UserID = keys[1]
+	k.CreatedAt = keys[2]
+}
+
+func pqToModel(t *pqdto) (*token.AuthToken, error) {
+	k := &key{}
+	k.decompose_key(t.Key)
+
+	created_at, err := time.Parse(TimeFormat, k.CreatedAt)
+	if err != nil {
+
+	}
+
+	return &token.AuthToken{
+		HostIdentifier: k.HostIdentifier,
+		UserID:         k.UserID,
+		CreatedAt:      created_at,
+		TokenString:    t.TokenString,
+	}, nil
+}
+
+func pqFromModel(t *token.AuthToken) *pqdto {
+	k := keyFromModel(t)
 	return &pqdto{
-		Key:         t.Key,
+		Key:         k.compose_key(),
 		CreatedAt:   t.CreatedAt,
 		TokenString: t.TokenString,
 	}

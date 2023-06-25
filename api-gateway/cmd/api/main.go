@@ -3,15 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"strconv"
+	"sync"
+
 	"github.com/Skaifai/gophers-microservice/api-gateway/internal/jsonlog"
 	productServiceProto "github.com/Skaifai/gophers-microservice/product-service/pkg/proto"
 	"github.com/joho/godotenv"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"os"
-	"strconv"
-	"sync"
 )
 
 const version = "1.0"
@@ -83,7 +84,7 @@ func main() {
 	flag.Parse()
 
 	// RabbitMQ
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@localhost:%s/", cfg.rmq.username, cfg.rmq.password, getEnvVarString("RMQ_PORT"))
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.rmq.username, cfg.rmq.password, "rabbitmq", cfg.rmq.port)
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Could not set up a connection to the message broker")
 	defer conn.Close()

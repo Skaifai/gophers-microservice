@@ -1,6 +1,20 @@
 version: '3'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - ./rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - network
+
   postgres:
     image: postgres
     container_name: postgres
@@ -9,7 +23,11 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=gophers-microservice
     ports:
-      - "5436:5432"
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - network
 
   product-service:
     build:
@@ -18,5 +36,43 @@ services:
     container_name: product-service
     depends_on:
       - postgres
+      - rabbitmq
     ports:
       - "8080:8080"
+    networks:
+      - network
+
+  logger-service:
+    build:
+      context: logger-service
+      dockerfile: deployments/deploy/logger-service.dockerfile
+    container_name: logger-service
+    depends_on:
+      - rabbitmq
+    ports:
+      - "6000:6000"
+    stdin_open: true
+    tty: true
+    networks:
+      - network
+
+  api-gateway:
+    build:
+      context: api-gateway
+      dockerfile: deployments/deploy/api-gateway.dockerfile
+    container_name: api-gateway
+    depends_on:
+      - logger-service
+      - product-service
+    ports:
+      - "7001:7001"
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
+
+volumes:
+  pgdata:
+

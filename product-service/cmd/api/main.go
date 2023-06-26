@@ -17,13 +17,23 @@ import (
 func main() {
 	cfg := config.LoadConfiguration()
 
-	flag.IntVar(&cfg.Port, "port", cfg.Port, "API server port")
-	flag.StringVar(&cfg.Env, "env", cfg.Env, "Environment (development|staging|production)")
+	flag.Int("port", cfg.Port, "API server port")
+	flag.String("env", cfg.Env, "Environment (development|staging|production)")
 
-	flag.StringVar(&cfg.DB.DSN, "db-dsn", cfg.DB.DSN, "PostgreSQL DSN")
-	flag.IntVar(&cfg.DB.MaxOpenConns, "db-max-open-conns", cfg.DB.MaxOpenConns, "PostgreSQL max open connections")
-	flag.IntVar(&cfg.DB.MaxIdleConns, "db-max-idle-conns", cfg.DB.MaxIdleConns, "PostgreSQL max idle connections")
-	flag.StringVar(&cfg.DB.MaxIdleTime, "db-max-idle-time", cfg.DB.MaxIdleTime, "PostgreSQL max idle time")
+	flag.String("db-dsn-host", cfg.DB.DSN.Host, "PostgreSQL DB host")
+	flag.String("db-dsn-name", cfg.DB.DSN.Name, "PostgreSQL DB name")
+	flag.String("db-dsn-username", cfg.DB.DSN.Username, "PostgreSQL DB username")
+	flag.String("db-dsn-password", cfg.DB.DSN.Password, "PostgreSQL DB password")
+	flag.Int("db-dsn-port", cfg.DB.DSN.Port, "PostgreSQL DB port")
+
+	flag.Int("db-max-open-conns", cfg.DB.MaxOpenConns, "PostgreSQL max open connections")
+	flag.Int("db-max-idle-conns", cfg.DB.MaxIdleConns, "PostgreSQL max idle connections")
+	flag.String("db-max-idle-time", cfg.DB.MaxIdleTime, "PostgreSQL max idle time")
+
+	flag.String("rmq-host", cfg.RMQ.Host, "Message broker host")
+	flag.Int("rabbitMQPort", cfg.RMQ.Port, "Message broker port")
+	flag.String("rmq-username", cfg.RMQ.Username, "Message broker username")
+	flag.String("rmq-password", cfg.RMQ.Password, "Message broker password")
 
 	flag.Parse()
 
@@ -33,7 +43,7 @@ func main() {
 	}
 	defer db.Close()
 
-	publisher, err := logger.NewPublisher()
+	publisher, err := logger.NewPublisher(cfg)
 	if err != nil {
 		log.Fatalf("failed to create publisher: %v", err)
 	}

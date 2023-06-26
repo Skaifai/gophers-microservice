@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"log"
 	"logger-service/internal/util"
 	"os"
 	"strconv"
@@ -13,6 +14,7 @@ type config struct {
 	rmqPort     int
 	rmqUsername string
 	rmqPassword string
+	host        string
 }
 
 type LogServer struct {
@@ -27,20 +29,29 @@ var rmqDSN string
 
 func main() {
 	var cfg config
-	rabbitMQPort, err := strconv.Atoi(getEnvVarString("PORT"))
+	rabbitMQPort, err := strconv.Atoi(getEnvVarString("RMQ_PORT"))
 	failOnError(err, "Could not convert string to int")
 	flag.IntVar(&cfg.rmqPort, "rabbitMQPort", rabbitMQPort, "The message broker port")
 	flag.StringVar(&cfg.rmqUsername, "rabbitMQUsername", getEnvVarString("RMQ_USERNAME"), "The message broker username")
 	flag.StringVar(&cfg.rmqPassword, "rabbitMQPassword", getEnvVarString("RMQ_PASSWORD"), "The message broker password")
+	flag.StringVar(&cfg.host, "rabbitMQHost", getEnvVarString("RMQ_HOST"), "The message broker host")
 
 	flag.Parse()
 
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.rmqUsername, cfg.rmqPassword, "rabbitmq", cfg.rmqPort)
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.rmqUsername, cfg.rmqPassword, cfg.host, cfg.rmqPort)
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
 	initializeServer(conn)
+
+	directoryExists, err := exists("log-files")
+	failOnError(err, "Failed to check if the log-files directory exists")
+
+	if !directoryExists {
+		os.Mkdir("log-files", 0750)
+		log.Println("A new directory has been created")
+	}
 
 	var f *os.File
 

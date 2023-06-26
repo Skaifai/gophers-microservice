@@ -29,6 +29,7 @@ type config struct {
 		port int
 	}
 	rmq struct {
+		host     string
 		port     int
 		username string
 		password string
@@ -77,6 +78,7 @@ func main() {
 
 	rabbitMQPort, err := strconv.Atoi(getEnvVarString("RMQ_PORT"))
 	failOnError(err, "Could not parse RMQ_PORT to int")
+	flag.StringVar(&cfg.rmq.host, "rmq-host", getEnvVarString("RMQ_HOST"), "Message broker host")
 	flag.IntVar(&cfg.rmq.port, "rabbitMQPort", rabbitMQPort, "Message broker port")
 	flag.StringVar(&cfg.rmq.username, "rmq-username", getEnvVarString("RMQ_USERNAME"), "Message broker username")
 	flag.StringVar(&cfg.rmq.password, "rmq-password", getEnvVarString("RMQ_PASSWORD"), "Message broker password")
@@ -84,7 +86,7 @@ func main() {
 	flag.Parse()
 
 	// RabbitMQ
-	rmqDSN = fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.rmq.username, cfg.rmq.password, "rabbitmq", cfg.rmq.port)
+	rmqDSN = fmt.Sprintf("amqp://%s:%s@%s:%d/", cfg.rmq.username, cfg.rmq.password, cfg.rmq.host, cfg.rmq.port)
 	conn, err := amqp.Dial(rmqDSN)
 	failOnError(err, "Could not set up a connection to the message broker")
 	defer conn.Close()

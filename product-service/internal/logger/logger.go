@@ -2,8 +2,11 @@ package logger
 
 import (
 	"context"
+	"fmt"
 	"github.com/Skaifai/gophers-microservice/product-service/config"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"log"
+	"strconv"
 	"time"
 )
 
@@ -12,8 +15,12 @@ type Publisher struct {
 	Channel *amqp.Channel
 }
 
-func NewPublisher() (*Publisher, error) {
-	conn, err := amqp.Dial(config.GetEnvironmentVar("RMQ_DSN"))
+func NewPublisher(cfg *config.Config) (*Publisher, error) {
+	rmqPort := strconv.Itoa(cfg.RMQ.Port)
+	rmqDSN := fmt.Sprintf("amqp://" + cfg.RMQ.Username + ":" + cfg.RMQ.Password +
+		"@" + cfg.RMQ.Host + ":" + rmqPort)
+	log.Println("NewPublisher: RMQ DSN = " + rmqDSN)
+	conn, err := amqp.Dial(rmqDSN)
 	if err != nil {
 		return nil, err
 	}

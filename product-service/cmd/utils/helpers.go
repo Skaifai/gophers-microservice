@@ -3,12 +3,19 @@ package utils
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/Skaifai/gophers-microservice/product-service/config"
+	"log"
+	"strconv"
 	"time"
 )
 
 func OpenDB(cfg *config.Config) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.DB.DSN)
+	dbPort := strconv.Itoa(cfg.DB.DSN.Port)
+	DSN := fmt.Sprintf("postgres://" + cfg.DB.DSN.Username + ":" + cfg.DB.DSN.Password +
+		"@" + cfg.DB.DSN.Host + ":" + dbPort + "/" + cfg.DB.DSN.Name + "?sslmode=disable")
+	log.Println("OpenDB: DB DSN = " + DSN)
+	db, err := sql.Open("postgres", DSN)
 	if err != nil {
 		return nil, err
 	}

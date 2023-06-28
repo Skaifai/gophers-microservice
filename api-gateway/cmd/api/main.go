@@ -95,7 +95,7 @@ func main() {
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo, rmqDSN)
 
 	// Product service
-	productServiceConnection, err = grpc.Dial(fmt.Sprintf(":%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	productServiceConnection, err = grpc.Dial(fmt.Sprintf("product-service:%d", cfg.productService.port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	failOnError(err, "Could not set up a connection to the Product service")
 	defer productServiceConnection.Close()
 

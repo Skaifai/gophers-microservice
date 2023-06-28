@@ -1,0 +1,6 @@
+docs
+deployments
+.idea
+.gitignore
+configs
+pkg

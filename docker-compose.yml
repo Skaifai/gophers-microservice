@@ -32,25 +32,21 @@ services:
   product-service:
     build:
       context: product-service
-      dockerfile: deployments/deploy/product-service.dockerfile
+      dockerfile: product-service.dockerfile
     container_name: product-service
     depends_on:
       - postgres
       - rabbitmq
-    ports:
-      - "8080:8080"
     networks:
       - network
 
   logger-service:
     build:
       context: logger-service
-      dockerfile: deployments/deploy/logger-service.dockerfile
+      dockerfile: logger-service.dockerfile
     container_name: logger-service
     depends_on:
       - rabbitmq
-    ports:
-      - "6000:6000"
     stdin_open: true
     tty: true
     networks:
@@ -59,7 +55,7 @@ services:
   api-gateway:
     build:
       context: api-gateway
-      dockerfile: deployments/deploy/api-gateway.dockerfile
+      dockerfile: api-gateway.dockerfile
     container_name: api-gateway
     depends_on:
       - logger-service
